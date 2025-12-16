@@ -1732,20 +1732,21 @@ function inforepo_display_post_file()
 
 
   /*************************    Register strings for internationalization   *****************************/
-  function register_theme_strings()
-  {
-    // Only proceed if WPML is active
-    if (!function_exists('icl_register_string')) return;
+//   uncomment when WPML is up and running @marieleponti
+//   function register_theme_strings()
+//   {
+//     // Only proceed if WPML is active
+//     if (!function_exists('icl_register_string')) return;
 
-    // Register each string with context
-    icl_register_string(
-      'inforepo',                   // Text domain
-      'Card Date Format',           // String name (context)
-      __('F j, Y', 'inforepo')      // String value (with translation wrapper)
-    );
-  }
-  // Hook early to ensure strings are registered
-  add_action('wp_loaded', 'register_theme_strings', 20);
+//     // Register each string with context
+//     icl_register_string(
+//       'inforepo',                   // Text domain
+//       'Card Date Format',           // String name (context)
+//       __('F j, Y', 'inforepo')      // String value (with translation wrapper)
+//     );
+//   }
+//   // Hook early to ensure strings are registered
+//   add_action('wp_loaded', 'register_theme_strings', 20);
 
   /************************    Register strings for internationalization end  ***************************/
 
