@@ -1,0 +1,52 @@
+{
+  "name": "inforepo",
+  "version": "1.0.0",
+  "description": "inforepo theme package",
+  "main": "main.js",
+  "scripts": {
+    "prod": "cross-env NODE_ENV=production webpack --mode production --progress",
+    "dev": "cross-env NODE_ENV=development webpack --watch --mode development --progress",
+    "clean": "rm -rf build/*"
+  },
+  "keywords": [
+    "wordpress",
+    "themes"
+  ],
+  "author": "mariele ponti",
+  "license": "MIT",
+  "private": true,
+  "browserslist": [
+    "defaults"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "@types/leaflet": "^1.9.12",
+    "babel-loader": "^9.1.2",
+    "file-loader": "^6.2.0",
+    "thread-loader": "^3.0.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  },
+  "dependencies": {
+    "@wordpress/dependency-extraction-webpack-plugin": "^6.3.0",
+    "bootstrap": "^5.3.3",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "cross-env": "^7.0.3",
+    "css-loader": "^7.1.2",
+    "jquery": "^3.7.1",
+    "js-cookie": "^3.0.5",
+    "leaflet": "^1.9.4",
+    "mapbox-gl": "^3.7.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "optimize-css-assets-webpack-plugin": "^6.0.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-leaflet": "^4.2.1",
+    "sass": "^1.77.6",
+    "sass-loader": "^14.2.1",
+    "uglifyjs-webpack-plugin": "^1.1.2"
+  }
+}
