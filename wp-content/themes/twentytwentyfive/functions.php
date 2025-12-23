@@ -163,30 +163,27 @@ endif;
 Info Repo Custom code start
 -------------------------------------------------------------------------------------------------*/
 
-#Load the Parent theme style.css file >> commenting out to remove because ttf theme should cover styles functionality. 
 
-// function dt_enqueue_styles()
-// {
+function eb_enqueue_styles()
+{
 
-//   $parenthandle = 'divi-style';
-//   $theme = wp_get_theme();
-//   wp_enqueue_style(
-//     $parenthandle,
-//     get_template_directory_uri() . '/style.css',
-//     array(),  // if the parent theme code has a dependency, copy it to here
-//     $theme->parent()->get('Version')
-//   );
-//   wp_enqueue_style(
-//     'child-style',
-//     get_stylesheet_uri(),
-//     array($parenthandle, 'bootstrap-css'),
-//     $theme->get('Version')
-//   );
+  $theme = wp_get_theme();
+  wp_enqueue_style(
+    get_template_directory_uri() . '/style.css',
+    array(),  
+    $theme->parent()->get('Version')
+  );
+  wp_enqueue_style(
+    'child-style',
+    get_stylesheet_uri(),
+    array('bootstrap-css'),
+    $theme->get('Version')
+  );
 
-//   wp_enqueue_style('bootstrap-css', get_home_url() . '/wp-content/themes/divi-child/assets/build/library/css/bootstrap.min.css', [], false, 'all');
-//   wp_enqueue_script('bootstrap-js', get_home_url() . '/wp-content/themes/divi-child/assets/build/library/js/bootstrap.min.js', ['jquery'], false, true);
-// }
-// add_action('wp_enqueue_scripts', 'dt_enqueue_styles');
+  wp_enqueue_style('bootstrap-css', get_home_url() . '/wp-content/themes/twentytwentyfive/assets/build/library/css/bootstrap.min.css', [], false, 'all');
+  wp_enqueue_script('bootstrap-js', get_home_url() . '/wp-content/themes/twentytwentyfive/assets/build/library/js/bootstrap.min.js', ['jquery'], false, true);
+}
+add_action('wp_enqueue_scripts', 'eb_enqueue_styles');
 
 
 /** Define path constants 
