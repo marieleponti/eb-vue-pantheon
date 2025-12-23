@@ -14,7 +14,7 @@ get_header();
 
     <div class="resource-page">
         <?php
-        get_template_part('template-parts/search-results-banner');
+        get_template_part('templates/search-results-banner');
         ?>
 
         <!-- FILTER RESULTS -->
