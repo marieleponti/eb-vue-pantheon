@@ -171,7 +171,6 @@ function eb_enqueue_styles()
   wp_enqueue_style(
     get_template_directory_uri() . '/style.css',
     array(),  
-    $theme->parent()->get('Version')
   );
   wp_enqueue_style(
     'child-style',
