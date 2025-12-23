@@ -19,7 +19,7 @@ get_header();
 
         <!-- FILTER RESULTS -->
         <?php
-        get_template_part('template-parts/filter-results');
+        get_template_part('templates/filter-results');
         ?>
 
         <div class="card-resource-list">
@@ -28,7 +28,7 @@ get_header();
                 <div class='container grid-layout-content-list-right' id="content" role="main">
 
                     <?php
-                    get_template_part('template-parts/resource-search-results');
+                    get_template_part('templates/resource-search-results');
 
                     ?>
                 </div><!-- #content -->
