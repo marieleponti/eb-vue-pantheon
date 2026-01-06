@@ -29,7 +29,7 @@ if (! defined('ABSPATH')) {
                         <figure>
                             <picture>
                                 <!-- Add the <img> tag here to ensure the image is displayed -->
-                                <img src="/wp-content/themes/divi-child/assets/images/border-tech.jpg" alt="Description of the image" style="width: 100%; height: auto;">
+                                <img src="/wp-content/themes/twentytwentyfive/assets/images/border-tech.jpg" alt="Description of the image" style="width: 100%; height: auto;">
                             </picture>
                             <figcaption class='caption'>Illustration by Zoran Svilar</figcaption>
                         </figure>

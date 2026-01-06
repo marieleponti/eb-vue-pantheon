@@ -34,7 +34,7 @@ if (! defined('ABSPATH')) {
                         <figure>
                             <picture>
                                 <!-- Add the <img> tag here to ensure the image is displayed -->
-                                <img src="/wp-content/themes/divi-child/assets/images/border-tech.jpg" alt="Description of the image" style="width: 100%; height: auto;">
+                                <img src="/wp-content/themes/twentytwentyfive/assets/images/border-tech.jpg" alt="Description of the image" style="width: 100%; height: auto;">
                             </picture>
                             <figcaption class='caption'><a href='https://www.instagram.com/chewsomebubblegum/' target="_blank"><?php echo esc_html__('Illustration by Zoran Svilar', 'inforepo'); ?></a></figcaption>
                         </figure>
@@ -57,7 +57,7 @@ MAIN
                     <div class="research-item">
                         <a href="<?php get_home_url(); ?>/border-externalization-in-americas/" class="research-link">
                             <div class="research-image">
-                                <img src="/wp-content/themes/divi-child/assets/images/minibrief_border-ext_img.jpg" alt="">
+                                <img src="/wp-content/themes/twentytwentyfive/assets/images/minibrief_border-ext_img.jpg" alt="">
                             </div>
                             <div class="research-content">
                                 <h3 class="research-title"><?php echo esc_html__('Border Externalization in the Americas', 'inforepo'); ?></h3>
@@ -77,7 +77,7 @@ MAIN
                         <div class="research-item">
                             <a href="<?php get_home_url(); ?>/biometrics-based-migration-management/" class="research-link">
                                 <div class="research-image">
-                                    <img src="/wp-content/themes/divi-child/assets/images/portada-advertencia-CUID.jpg" alt="">
+                                    <img src="/wp-content/themes/twentytwentyfive/assets/images/portada-advertencia-CUID.jpg" alt="">
                                 </div>
                                 <div class="research-content">
                                     <h3 class="research-title"><?php echo esc_html__('Biometrics-Based Migration Management Infrastructures', 'inforepo'); ?></h3>
@@ -95,7 +95,7 @@ MAIN
                     <div class="research-item">
                         <a href="<?php get_home_url(); ?>/human-impacts-brief/" class="research-link">
                             <div class="research-image">
-                                <img src="/wp-content/themes/divi-child/assets/images/human_impacts_img2.png" alt="">
+                                <img src="/wp-content/themes/twentytwentyfive/assets/images/human_impacts_img2.png" alt="">
                             </div>
                             <div class="research-content">
                                 <h3 class="research-title"><?php echo esc_html__('Human Impacts', 'inforepo'); ?></h3>
@@ -111,7 +111,7 @@ MAIN
                        <div class="research-item">
                         <a href="<?php get_home_url(); ?>/biometrics-mx-ca/" class="research-link">
                             <div class="research-image">
-                                <img src="/wp-content/themes/divi-child/assets/images/biometrics-mx-ca.jpg" alt="">
+                                <img src="/wp-content/themes/twentytwentyfive/assets/images/biometrics-mx-ca.jpg" alt="">
                             </div>
                             <div class="research-content">
                                 <h3 class="research-title"><?php echo esc_html__('Biometrics & Borders', 'inforepo'); ?></h3>

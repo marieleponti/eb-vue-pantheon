@@ -192,7 +192,7 @@ if (!defined('INFOREPO_DIR_PATH')) {
   define('INFOREPO_DIR_PATH', untrailingslashit(get_theme_file_path()));
 }
 if (!defined('INFOREPO_DIR_URI')) {
-  define('INFOREPO_DIR_URI', untrailingslashit(get_theme_file_uri()) . './divi-child');
+  define('INFOREPO_DIR_URI', untrailingslashit(get_theme_file_uri()) . './twentytwentyfive');
 }
 if (!defined('INFOREPO_BUILD_URI')) {
   define('INFOREPO_BUILD_URI', untrailingslashit(get_theme_file_uri()) . '/assets/build');
@@ -1495,7 +1495,7 @@ function inforepo_display_post_file()
   function inforepo_set_default_featured_image($html, $post_id, $post_thumbnail_id, $size, $attr)
   {
     if (empty($post_thumbnail_id)) {
-      $default_image_url = get_home_url() . '/wp-content/themes/divi-child/assets/images/pic_post.jpg';
+      $default_image_url = get_home_url() . '/wp-content/themes/twentytwentyfive/assets/images/pic_post.jpg';
       $html = '<img src="' . esc_url($default_image_url) . '" class="wp-post-image" alt="Default Image"/>';
     }
     return $html;
@@ -1505,7 +1505,7 @@ function inforepo_display_post_file()
   function inforepo_set_default_featured_image_url($url, $post_id)
   {
     if (empty(get_post_thumbnail_id($post_id))) {
-      $url = get_home_url() . '/wp-content/themes/divi-child/assets/images/default_thumbnail.jpg';
+      $url = get_home_url() . '/wp-content/themes/twentytwentyfive/assets/images/default_thumbnail.jpg';
     }
     return $url;
   }

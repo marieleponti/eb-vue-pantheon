@@ -43,7 +43,7 @@ jQuery(document).ready(function ($) {
         var popupText = "<a href=" + pinLink + ">" + pinTitle + "</a>";
 
         var myIcon = L.icon({
-            iconUrl: '/wp-content/themes/divi-child/assets/images/marker.svg',
+            iconUrl: '/wp-content/themes/twentytwentyfive/assets/images/marker.svg',
             iconSize: [24, 36],
             iconAnchor: [12, 36],
             popupAnchor: [-3, -76],

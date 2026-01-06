@@ -11,7 +11,7 @@ if (! defined('ABSPATH')) {
             <div class="research-item">
                 <a href="<?php get_home_url(); ?>/human-impacts-brief/" class="research-link">
                     <div class="research-image-further-reading">
-                        <img src="/wp-content/themes/divi-child/assets/images/human_impacts_img2.png" alt="">
+                        <img src="/wp-content/themes/twentytwentyfive/assets/images/human_impacts_img2.png" alt="">
                     </div>
                     <div class="research-content">
                         <h3 class="research-title">Human Impacts</h3>
@@ -31,7 +31,7 @@ if (! defined('ABSPATH')) {
                 <div class="research-item">
                     <a href="<?php get_home_url(); ?>/biometrics-based-migration-management/" class="research-link">
                         <div class="research-image-further-reading">
-                            <img src="/wp-content/themes/divi-child/assets/images/portada-advertencia-CUID.jpg" alt="">
+                            <img src="/wp-content/themes/twentytwentyfive/assets/images/portada-advertencia-CUID.jpg" alt="">
                         </div>
                         <div class="research-content">
                             <h3 class="research-title">Biometrics-Based Migration Management Infrastructures</h3>
