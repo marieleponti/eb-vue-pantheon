@@ -813,7 +813,7 @@ function inforepo_add_terms_to_resource_taxonomies()
  * at every init, it will override those deletions and edits. 
  * 
  */
-add_action('init', 'inforepo_add_terms_to_resource_taxonomies');
+// add_action('init', 'inforepo_add_terms_to_resource_taxonomies');
 
 function inforepo_update_countries(){
     $countries = [

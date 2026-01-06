@@ -297,16 +297,16 @@ add_action('after_setup_theme', 'inforepo_setup');
  * @package inforepo
  * @author marieleponti
  */
-// function inforepo_menus()
-// {
-// 	register_nav_menus(array(
-// 		'main-menu-private' => __('Main Menu Private', 'inforepo'),
-// 		'main-menu-public' => __('Main Menu Public', 'inforepo'),
-//     'private-footer-menu' => __('Private Footer Menu', 'inforepo'),
-//     'public-footer-meernu' => __('Public Footer Menu', 'inforepo'),
-// 	));
-// }
-// add_action('init', 'inforepo_menus');
+function inforepo_menus()
+{
+	register_nav_menus(array(
+		'main-menu-private' => __('Main Menu Private', 'inforepo'),
+		'main-menu-public' => __('Main Menu Public', 'inforepo'),
+    'private-footer-menu' => __('Private Footer Menu', 'inforepo'),
+    'public-footer-meernu' => __('Public Footer Menu', 'inforepo'),
+	));
+}
+add_action('init', 'inforepo_menus');
 
 
 /* -------------  Implement Bootstrap Menus     -------------*/
