@@ -73,6 +73,11 @@ if ( ! defined( 'WP_DEBUG' ) ) {
 	define('WP_DEBUG', false);
 }
 
+
+define('JWT_AUTH_SECRET_KEY', '<Zwnv6>kbH*%qz;Kf8oHk@R-Nz-08-S5SOxqTT=S%icz,u9ImdG)B}Ve#s<+zj].');
+
+define('JWT_AUTH_CORS_ENABLE', true);
+
 /* That's all, stop editing! Happy Pressing. */
 
 
