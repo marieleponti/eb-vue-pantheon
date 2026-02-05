@@ -78,10 +78,9 @@ define('JWT_AUTH_SECRET_KEY', '<Zwnv6>kbH*%qz;Kf8oHk@R-Nz-08-S5SOxqTT=S%icz,u9Im
 
 define('JWT_AUTH_CORS_ENABLE', true);
 
+if (isset($_SERVER['HTTP_AUTHORIZATION'])) { $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] = $_SERVER['HTTP_AUTHORIZATION']; }
+
 /* That's all, stop editing! Happy Pressing. */
-
-
-
 
 /** Absolute path to the WordPress directory. */
 if ( !defined('ABSPATH') )
