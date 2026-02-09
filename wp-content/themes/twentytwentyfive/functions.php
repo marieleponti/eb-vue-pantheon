@@ -1738,7 +1738,7 @@ function inforepo_display_post_file()
    ***********************************************************************/
   add_action('init', function () {
     // Allow access to front end app
-    header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app/");
+    header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
     header("Access-Control-Allow-Headers: Authorization, Content-Type");
 
