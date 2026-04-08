@@ -1736,31 +1736,18 @@ function inforepo_display_post_file()
   /*********************************************************************** 
    * CORS config to allow access to frontend app via API
    ***********************************************************************/
-  // add_action('init', function () {
-  //   // Allow access to front end app
-  //   header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
-  //   header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-  //   header("Access-Control-Allow-Headers: Authorization, Content-Type");
+  add_action('init', function () {
+    // Allow access to front end app
+    header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+    header("Access-Control-Allow-Headers: Authorization, Content-Type");
 
-  //   // Respond correctly to preflight options
-  //   if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-  //     status_header(200);
-  //     exit();
-  //   }
+    // Respond correctly to preflight options
+    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+      status_header(200);
+      exit();
+    }
   });
-
-  add_action('rest_api_init', function () {
-    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
-
-    add_filter('rest_pre_serve_request', function ($value) {
-        header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
-        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-        header("Access-Control-Allow-Headers: Authorization, Content-Type");
-        header("Access-Control-Allow-Credentials: true");
-        return $value;
-    });
-}, 15);
-
 
 
 
