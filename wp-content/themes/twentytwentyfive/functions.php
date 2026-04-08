@@ -1733,11 +1733,7 @@ function inforepo_display_post_file()
   }
 
 
-  /*********************************************************************** 
-   * CORS config to allow access to frontend app via API
-   ***********************************************************************/
-  add_action('init', function () {
-    /*********************************************************************** 
+/*********************************************************************** 
  * CORS config to allow access to frontend app via API
  ***********************************************************************/
 add_action('init', function () {
@@ -1762,12 +1758,11 @@ add_action('init', function () {
     exit();
   }
 });
-  });
 
 
 
 
-  /*************************    Register strings for internationalization   *****************************/
+/*************************    Register strings for internationalization   *****************************/
 //   uncomment when WPML is up and running @marieleponti
 //   function register_theme_strings()
 //   {
