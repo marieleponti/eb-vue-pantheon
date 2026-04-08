@@ -1737,16 +1737,31 @@ function inforepo_display_post_file()
    * CORS config to allow access to frontend app via API
    ***********************************************************************/
   add_action('init', function () {
-    // Allow access to front end app
-    header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
-    header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-    header("Access-Control-Allow-Headers: Authorization, Content-Type");
+    /*********************************************************************** 
+ * CORS config to allow access to frontend app via API
+ ***********************************************************************/
+add_action('init', function () {
 
-    // Respond correctly to preflight options
-    if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-      status_header(200);
-      exit();
-    }
+  $allowed_origins = [
+    'https://lucent-kangaroo-df32c9.netlify.app',
+    'http://localhost:8080',
+    'http://localhost:3000'
+  ];
+
+  if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed_origins)) {
+    header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
+  }
+
+  header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+  header("Access-Control-Allow-Headers: Authorization, Content-Type");
+  header("Vary: Origin"); // 🔥 importante para caché (Pantheon)
+
+  // Preflight
+  if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    status_header(200);
+    exit();
+  }
+});
   });
 
 
