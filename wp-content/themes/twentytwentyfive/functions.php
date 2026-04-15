@@ -1754,7 +1754,7 @@ add_action('rest_api_init', function () {
         // Permitir Netlify y localhost
         $allowed_origins = [
             'https://lucent-kangaroo-df32c9.netlify.app', // Netlify
-            'http://localhost:8080' // Localhost
+            'http://127.0.0.1:8080' // Localhost
         ];
         
         $origin = $_SERVER['HTTP_ORIGIN'];
