@@ -1757,7 +1757,7 @@ add_action('rest_api_init', function () {
             'http://127.0.0.1:8080' // Localhost
         ];
         
-        $origin = $_SERVER['HTTP_ORIGIN'];
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? ''; 
 
         if (in_array($origin, $allowed_origins)) {
             header("Access-Control-Allow-Origin: $origin");
