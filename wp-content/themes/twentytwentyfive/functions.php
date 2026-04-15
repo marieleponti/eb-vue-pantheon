@@ -1748,15 +1748,26 @@ function inforepo_display_post_file()
   //     exit();
   //   }
   // });
-  add_action('rest_api_init', function () {
+add_action('rest_api_init', function () {
     remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
     add_filter('rest_pre_serve_request', function ($value) {
-      header('Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app');
-      header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-      header('Access-Control-Allow-Headers: Authorization, Content-Type');
-      return $value;
+        // Permitir Netlify y localhost
+        $allowed_origins = [
+            'https://lucent-kangaroo-df32c9.netlify.app', // Netlify
+            'http://localhost:8080' // Localhost
+        ];
+        
+        $origin = $_SERVER['HTTP_ORIGIN'];
+
+        if (in_array($origin, $allowed_origins)) {
+            header("Access-Control-Allow-Origin: $origin");
+        }
+
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type');
+        return $value;
     });
-  });
+}); 
 
 
   /*************************    Register strings for internationalization   *****************************/
