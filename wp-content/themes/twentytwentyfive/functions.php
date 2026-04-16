@@ -1733,32 +1733,32 @@ function inforepo_display_post_file()
   }
 
 
-  /*********************************************************************** 
-   * CORS config to allow access to frontend app via API
-   ***********************************************************************/
+/*********************************************************************** 
+ * CORS config to allow access to frontend app via API
+ ***********************************************************************/
 add_action('rest_api_init', function () {
-    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+  remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
 
-    add_filter('rest_pre_serve_request', function ($value) {
+  add_filter('rest_pre_serve_request', function ($value) {
 
-        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-        if (
-            $origin === 'http://127.0.0.1:8080' ||
-            str_contains($origin, '.netlify.app')
-        ) {
-            header("Access-Control-Allow-Origin: $origin");
-        }
+    if (
+      $origin === 'http://127.0.0.1:8080' ||
+      str_contains($origin, 'lucent-kangaroo-df32c9.netlify.app')
+    ) {
+      header("Access-Control-Allow-Origin: $origin");
+    }
 
-        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-        header('Access-Control-Allow-Headers: Authorization, Content-Type');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Authorization, Content-Type');
 
-        return $value;
-    });
+    return $value;
+  });
 });
 
 
-  /*************************    Register strings for internationalization   *****************************/
+/*************************    Register strings for internationalization   *****************************/
 //   uncomment when WPML is up and running @marieleponti
 //   function register_theme_strings()
 //   {
