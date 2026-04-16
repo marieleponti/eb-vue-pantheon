@@ -1745,6 +1745,7 @@ add_action('rest_api_init', function () {
 
     if (
       $origin === 'http://127.0.0.1:8080' ||
+      $origin === 'http://127.0.0.1:5173' ||
       str_contains($origin, 'lucent-kangaroo-df32c9.netlify.app')
     ) {
       header("Access-Control-Allow-Origin: $origin");
