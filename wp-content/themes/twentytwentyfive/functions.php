@@ -1736,38 +1736,29 @@ function inforepo_display_post_file()
   /*********************************************************************** 
    * CORS config to allow access to frontend app via API
    ***********************************************************************/
-  // add_action('init', function () {
-  //   // Allow access to front end app
-  //   header("Access-Control-Allow-Origin: https://lucent-kangaroo-df32c9.netlify.app");
-  //   header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-  //   header("Access-Control-Allow-Headers: Authorization, Content-Type");
-
-  //   // Respond correctly to preflight options
-  //   if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-  //     status_header(200);
-  //     exit();
-  //   }
-  // });
 add_action('rest_api_init', function () {
     remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
-    add_filter('rest_pre_serve_request', function ($value) {
-        // Permitir Netlify y localhost
-        $allowed_origins = [
-            'https://lucent-kangaroo-df32c9.netlify.app', // Netlify
-            'http://127.0.0.1:8080' // Localhost
-        ];
-        
-        $origin = $_SERVER['HTTP_ORIGIN'] ?? ''; 
 
-        if (in_array($origin, $allowed_origins)) {
+    add_filter('rest_pre_serve_request', function ($value) {
+
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+        // Permitir localhost
+        if ($origin === 'http://127.0.0.1:8080') {
+            header("Access-Control-Allow-Origin: $origin");
+        }
+
+        // Permitir cualquier subdominio de Netlify
+        if (strpos($origin, '.netlify.app') !== false) {
             header("Access-Control-Allow-Origin: $origin");
         }
 
         header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
         header('Access-Control-Allow-Headers: Authorization, Content-Type');
+
         return $value;
     });
-}); 
+});
 
 
   /*************************    Register strings for internationalization   *****************************/
