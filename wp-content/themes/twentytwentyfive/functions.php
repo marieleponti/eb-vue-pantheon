@@ -1743,13 +1743,10 @@ add_action('rest_api_init', function () {
 
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-        // Permitir localhost
-        if ($origin === 'http://127.0.0.1:8080') {
-            header("Access-Control-Allow-Origin: $origin");
-        }
-
-        // Permitir cualquier subdominio de Netlify
-        if (strpos($origin, '.netlify.app') !== false) {
+        if (
+            $origin === 'http://127.0.0.1:8080' ||
+            str_contains($origin, '.netlify.app')
+        ) {
             header("Access-Control-Allow-Origin: $origin");
         }
 
