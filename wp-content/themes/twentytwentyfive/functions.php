@@ -1743,21 +1743,26 @@ add_action('rest_api_init', function () {
 
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 
-    if (
+    $allowed =
       $origin === 'http://127.0.0.1:8080' ||
       $origin === 'http://127.0.0.1:5173' ||
-      str_contains($origin, 'lucent-kangaroo-df32c9.netlify.app')
-    ) {
+      str_contains($origin, 'netlify.app');
+
+    if ($allowed) {
       header("Access-Control-Allow-Origin: $origin");
+      header('Vary: Origin');
     }
 
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Headers: Authorization, Content-Type');
 
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+      exit;
+    }
+
     return $value;
   });
 });
-
 
 /*************************    Register strings for internationalization   *****************************/
 //   uncomment when WPML is up and running @marieleponti
