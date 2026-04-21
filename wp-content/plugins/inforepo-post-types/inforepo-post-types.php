@@ -62,7 +62,7 @@ function inforepo_resource_post_type()
         'description'           => __('Resource Libary', 'inforepo'),
         'labels'                => $labels,
         'supports'              => array('title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'revisions', 'custom-fields', 'page-attributes'),
-        'hierarchical'          => true, // cuando es verdad, funciona como página
+        'hierarchical'          => false, // cuando es verdad, funciona como página
         'public'                => true, //Whether a post type is intended for use publicly either via the admin interface or by front-end users. 
         'show_in_rest'          => true,
         'show_ui'               => true,
@@ -73,7 +73,7 @@ function inforepo_resource_post_type()
         'show_in_nav_menus'     => true,
         'can_export'            => true,
         'has_archive'           => 'resources', // set to false to eliminate /resources/ page
-        'posts_per_page'        => -1,
+        // 'posts_per_page'        => -1,
         'exclude_from_search'   => false, // Whether to exclude posts with this post type from front end search results
         'publicly_queryable'    => true, // Whether queries can be performed on the front end for the post type as part of parse_request().
         'capability_type'       => 'post',
@@ -83,10 +83,8 @@ function inforepo_resource_post_type()
     );
 
     register_post_type('inforepo_resource', $args);
-    flush_rewrite_rules();
 }
 add_action('init', 'inforepo_resource_post_type', 0);
-
 
 /**
  * start register taxonomies for post type inforepo_resources
@@ -162,8 +160,6 @@ function register_resource_taxonomies()
         )
     );
 
-
-
     register_taxonomy(
         'country',
         'inforepo_resource',
@@ -231,7 +227,6 @@ function register_resource_taxonomies()
             'rewrite' => array('slug' => 'city-community')
         )
     );
-
 
     register_taxonomy(
         'source',
@@ -301,7 +296,10 @@ function register_resource_taxonomies()
             'show_in_rest' => true,
             'query_var' => true,
             'rewrite' => false,
-            'default_term' => 'Private'
+            'default_term' => [
+                'name' => 'Private',
+                'slug' => 'private'
+            ]
         )
     );
 
@@ -441,8 +439,6 @@ function register_resource_taxonomies()
             'rewrite' => array('slug' => 'authoring-organization')
         )
     );
-
-
     /**
      * end register taxonomies for post type inforepo_resources
      */
@@ -453,7 +449,7 @@ add_action('init', 'register_resource_taxonomies');
 /**
  * add terms to taxonomies
  */
-function inforepo_add_terms_to_resource_taxonomies()
+function inforepo_seed_terms()
 {
     $topics = [
         'Border tech',
@@ -473,8 +469,10 @@ function inforepo_add_terms_to_resource_taxonomies()
         'Securitization'
 
     ];
-    foreach ($topics as $topic) {
-        wp_insert_term($topic, 'topic');
+    foreach ($topics as $t) {
+        if (!term_exists($t, 'topic')) {
+            wp_insert_term($t, 'topic');
+        }
     }
 
     $formats = [
@@ -494,8 +492,10 @@ function inforepo_add_terms_to_resource_taxonomies()
         'Interview',
         'Visualizations'
     ];
-    foreach ($formats as $format) {
-        wp_insert_term($format, 'format');
+    foreach ($formats as $f) {
+        if (!term_exists($f, 'format')) {
+            wp_insert_term($f, 'format');
+        }
     }
 
 
@@ -751,8 +751,10 @@ function inforepo_add_terms_to_resource_taxonomies()
         'Zambia',
         'Zimbabwe'
     ];
-    foreach ($countries as $country) {
-        wp_insert_term($country, 'country');
+    foreach ($countries as $c) {
+        if (!term_exists($c, 'country')) {
+            wp_insert_term($c, 'country');
+        }
     }
 
     $languages = [
@@ -761,18 +763,21 @@ function inforepo_add_terms_to_resource_taxonomies()
         'Portuguese',
         'Haitian Creole'
     ];
-    foreach ($languages as $language) {
-        wp_insert_term($language, 'language');
+    foreach ($languages as $l) {
+        if (!term_exists($l, 'language')) {
+            wp_insert_term($l, 'language');
+        }
     }
 
     $visibility = [
         'Private',
         'Public'
     ];
-    foreach ($visibility as $visibility) {
-        wp_insert_term($visibility, 'visibility');
+    foreach ($visibility as $v) {
+        if (!term_exists($v, 'visibility')) {
+            wp_insert_term($v, 'visibility');
+        }
     }
-
 
     $sources = [
         'Public Records Requests',
@@ -785,22 +790,24 @@ function inforepo_add_terms_to_resource_taxonomies()
         'Non-profit/NGO',
         'Private Sector'
     ];
-    foreach ($sources as $source) {
-        wp_insert_term($source, 'source');
+    foreach ($sources as $s) {
+        if (!term_exists($s, 'source')) {
+            wp_insert_term($s, 'source');
+        }
     }
 
     $research_teams = [
         'EB Research'
     ];
-    foreach ($research_teams as $research_team) {
-        wp_insert_term($research_team, 'research-team');
+    if (!term_exists('EB Research', 'research-team')) {
+        wp_insert_term('EB Research', 'research-team');
     }
 
     $special_content_types = [
         'featured'
     ];
-    foreach ($special_content_types as $special_content) {
-        wp_insert_term($special_content, 'special-content');
+    if (!term_exists('featured', 'special-content')) {
+        wp_insert_term('featured', 'special-content');
     }
 }
 /**
@@ -816,266 +823,274 @@ function inforepo_add_terms_to_resource_taxonomies()
  */
 // add_action('init', 'inforepo_add_terms_to_resource_taxonomies');
 
-function inforepo_update_countries(){
-    $countries = [
-        'Afghanistan',
-        'Aland Islands',
-        'Albania',
-        'Algeria',
-        'American Samoa',
-        'Andorra',
-        'Angola',
-        'Anguilla',
-        'Antarctica',
-        'Antigua and Barbuda',
-        'Argentina',
-        'Armenia',
-        'Aruba',
-        'Australia',
-        'Austria',
-        'Azerbaijan',
-        'Bahrain',
-        'Bangladesh',
-        'Barbados',
-        'Belarus',
-        'Belgium',
-        'Belize',
-        'Benin',
-        'Bermuda',
-        'Bhutan',
-        'Bolivia',
-        'Bonaire, Sint Eustatius and Saba',
-        'Bosnia and Herzegovina',
-        'Botswana',
-        'Bouvet Island',
-        'Brazil',
-        'British Indian Ocean Territory',
-        'Brunei',
-        'Bulgaria',
-        'Burkina Faso',
-        'Burundi',
-        'Cambodia',
-        'Cameroon',
-        'Canada',
-        'Cape Verde',
-        'Cayman Islands',
-        'Central African Republic',
-        'Chad',
-        'Chile',
-        'China',
-        'Christmas Island',
-        'Cocos (Keeling) Islands',
-        'Colombia',
-        'Comoros',
-        'Congo',
-        'Cook Islands',
-        'Costa Rica',
-        'Cote D\'Ivoire (Ivory Coast)',
-        'Croatia',
-        'Cuba',
-        'Curaçao',
-        'Cyprus',
-        'Czech Republic',
-        'Democratic Republic of the Congo',
-        'Denmark',
-        'Djibouti',
-        'Dominica',
-        'Dominican Republic',
-        'Ecuador',
-        'Egypt',
-        'El Salvador',
-        'Equatorial Guinea',
-        'Eritrea',
-        'Estonia',
-        'Eswatini',
-        'Ethiopia',
-        'Falkland Islands',
-        'Faroe Islands',
-        'Fiji Islands',
-        'Finland',
-        'France',
-        'French Guiana',
-        'French Polynesia',
-        'French Southern Territories',
-        'Gabon',
-        'Georgia',
-        'Germany',
-        'Ghana',
-        'Gibraltar',
-        'Greece',
-        'Greenland',
-        'Grenada',
-        'Guadeloupe',
-        'Guam',
-        'Guatemala',
-        'Guernsey and Alderney',
-        'Guinea',
-        'Guinea-Bissau',
-        'Guyana',
-        'Haiti',
-        'Heard Island and McDonald Islands',
-        'Honduras',
-        'Hong Kong S.A.R.',
-        'Hungary',
-        'Iceland',
-        'India',
-        'Indonesia',
-        'Iran',
-        'Iraq',
-        'Ireland',
-        'Israel',
-        'Italy',
-        'Jamaica',
-        'Japan',
-        'Jersey',
-        'Jordan',
-        'Kazakhstan',
-        'Kenya',
-        'Kiribati',
-        'Kosovo',
-        'Kuwait',
-        'Kyrgyzstan',
-        'Laos',
-        'Latvia',
-        'Lebanon',
-        'Lesotho',
-        'Liberia',
-        'Libya',
-        'Liechtenstein',
-        'Lithuania',
-        'Luxembourg',
-        'Macau S.A.R.',
-        'Madagascar',
-        'Malawi',
-        'Malaysia',
-        'Maldives',
-        'Mali',
-        'Malta',
-        'Man (Isle of)',
-        'Marshall Islands',
-        'Martinique',
-        'Mauritania',
-        'Mauritius',
-        'Mayotte',
-        'Mexico',
-        'Micronesia',
-        'Moldova',
-        'Monaco',
-        'Mongolia',
-        'Montenegro',
-        'Montserrat',
-        'Morocco',
-        'Mozambique',
-        'Myanmar',
-        'Namibia',
-        'Nauru',
-        'Nepal',
-        'Netherlands',
-        'New Caledonia',
-        'New Zealand',
-        'Nicaragua',
-        'Niger',
-        'Nigeria',
-        'Niue',
-        'Norfolk Island',
-        'North Korea',
-        'North Macedonia',
-        'Northern Mariana Islands',
-        'Norway',
-        'Oman',
-        'Pakistan',
-        'Palau',
-        'Palestinian Territory Occupied',
-        'Panama',
-        'Papua New Guinea',
-        'Paraguay',
-        'Peru',
-        'Philippines',
-        'Pitcairn Island',
-        'Poland',
-        'Portugal',
-        'Puerto Rico',
-        'Qatar',
-        'Reunion',
-        'Romania',
-        'Russia',
-        'Rwanda',
-        'Saint Helena',
-        'Saint Kitts and Nevis',
-        'Saint Lucia',
-        'Saint Pierre and Miquelon',
-        'Saint Vincent and the Grenadines',
-        'Saint-Barthelemy',
-        'Saint-Martin (French part)',
-        'Samoa',
-        'San Marino',
-        'Sao Tome and Principe',
-        'Saudi Arabia',
-        'Senegal',
-        'Serbia',
-        'Seychelles',
-        'Sierra Leone',
-        'Singapore',
-        'Sint Maarten (Dutch part)',
-        'Slovakia',
-        'Slovenia',
-        'Solomon Islands',
-        'Somalia',
-        'South Africa',
-        'South Georgia',
-        'South Korea',
-        'South Sudan',
-        'Spain',
-        'Sri Lanka',
-        'Sudan',
-        'Suriname',
-        'Svalbard and Jan Mayen Islands',
-        'Sweden',
-        'Switzerland',
-        'Syria',
-        'Taiwan',
-        'Tajikistan',
-        'Tanzania',
-        'Thailand',
-        'The Bahamas',
-        'The Gambia ',
-        'Timor-Leste',
-        'Togo',
-        'Tokelau',
-        'Tonga',
-        'Trinidad and Tobago',
-        'Tunisia',
-        'Turkey',
-        'Turkmenistan',
-        'Turks and Caicos Islands',
-        'Tuvalu',
-        'Uganda',
-        'Ukraine',
-        'United Arab Emirates',
-        'United Kingdom',
-        'United States',
-        'United States Minor Outlying Islands',
-        'Uruguay',
-        'Uzbekistan',
-        'Vanuatu',
-        'Vatican City State (Holy See)',
-        'Venezuela',
-        'Vietnam',
-        'Virgin Islands (British)',
-        'Virgin Islands (US)',
-        'Wallis and Futuna Islands',
-        'Western Sahara',
-        'Yemen',
-        'Zambia',
-        'Zimbabwe'
-    ];
-    foreach ($countries as $country) {
-        if (!term_exists($country, 'country')){
-            wp_insert_term($country, 'country');
-        }
-    }
-}
-add_action('init', 'inforepo_update_countries');
+// function inforepo_update_countries()
+// {
+//     $countries = [
+//         'Afghanistan',
+//         'Aland Islands',
+//         'Albania',
+//         'Algeria',
+//         'American Samoa',
+//         'Andorra',
+//         'Angola',
+//         'Anguilla',
+//         'Antarctica',
+//         'Antigua and Barbuda',
+//         'Argentina',
+//         'Armenia',
+//         'Aruba',
+//         'Australia',
+//         'Austria',
+//         'Azerbaijan',
+//         'Bahrain',
+//         'Bangladesh',
+//         'Barbados',
+//         'Belarus',
+//         'Belgium',
+//         'Belize',
+//         'Benin',
+//         'Bermuda',
+//         'Bhutan',
+//         'Bolivia',
+//         'Bonaire, Sint Eustatius and Saba',
+//         'Bosnia and Herzegovina',
+//         'Botswana',
+//         'Bouvet Island',
+//         'Brazil',
+//         'British Indian Ocean Territory',
+//         'Brunei',
+//         'Bulgaria',
+//         'Burkina Faso',
+//         'Burundi',
+//         'Cambodia',
+//         'Cameroon',
+//         'Canada',
+//         'Cape Verde',
+//         'Cayman Islands',
+//         'Central African Republic',
+//         'Chad',
+//         'Chile',
+//         'China',
+//         'Christmas Island',
+//         'Cocos (Keeling) Islands',
+//         'Colombia',
+//         'Comoros',
+//         'Congo',
+//         'Cook Islands',
+//         'Costa Rica',
+//         'Cote D\'Ivoire (Ivory Coast)',
+//         'Croatia',
+//         'Cuba',
+//         'Curaçao',
+//         'Cyprus',
+//         'Czech Republic',
+//         'Democratic Republic of the Congo',
+//         'Denmark',
+//         'Djibouti',
+//         'Dominica',
+//         'Dominican Republic',
+//         'Ecuador',
+//         'Egypt',
+//         'El Salvador',
+//         'Equatorial Guinea',
+//         'Eritrea',
+//         'Estonia',
+//         'Eswatini',
+//         'Ethiopia',
+//         'Falkland Islands',
+//         'Faroe Islands',
+//         'Fiji Islands',
+//         'Finland',
+//         'France',
+//         'French Guiana',
+//         'French Polynesia',
+//         'French Southern Territories',
+//         'Gabon',
+//         'Georgia',
+//         'Germany',
+//         'Ghana',
+//         'Gibraltar',
+//         'Greece',
+//         'Greenland',
+//         'Grenada',
+//         'Guadeloupe',
+//         'Guam',
+//         'Guatemala',
+//         'Guernsey and Alderney',
+//         'Guinea',
+//         'Guinea-Bissau',
+//         'Guyana',
+//         'Haiti',
+//         'Heard Island and McDonald Islands',
+//         'Honduras',
+//         'Hong Kong S.A.R.',
+//         'Hungary',
+//         'Iceland',
+//         'India',
+//         'Indonesia',
+//         'Iran',
+//         'Iraq',
+//         'Ireland',
+//         'Israel',
+//         'Italy',
+//         'Jamaica',
+//         'Japan',
+//         'Jersey',
+//         'Jordan',
+//         'Kazakhstan',
+//         'Kenya',
+//         'Kiribati',
+//         'Kosovo',
+//         'Kuwait',
+//         'Kyrgyzstan',
+//         'Laos',
+//         'Latvia',
+//         'Lebanon',
+//         'Lesotho',
+//         'Liberia',
+//         'Libya',
+//         'Liechtenstein',
+//         'Lithuania',
+//         'Luxembourg',
+//         'Macau S.A.R.',
+//         'Madagascar',
+//         'Malawi',
+//         'Malaysia',
+//         'Maldives',
+//         'Mali',
+//         'Malta',
+//         'Man (Isle of)',
+//         'Marshall Islands',
+//         'Martinique',
+//         'Mauritania',
+//         'Mauritius',
+//         'Mayotte',
+//         'Mexico',
+//         'Micronesia',
+//         'Moldova',
+//         'Monaco',
+//         'Mongolia',
+//         'Montenegro',
+//         'Montserrat',
+//         'Morocco',
+//         'Mozambique',
+//         'Myanmar',
+//         'Namibia',
+//         'Nauru',
+//         'Nepal',
+//         'Netherlands',
+//         'New Caledonia',
+//         'New Zealand',
+//         'Nicaragua',
+//         'Niger',
+//         'Nigeria',
+//         'Niue',
+//         'Norfolk Island',
+//         'North Korea',
+//         'North Macedonia',
+//         'Northern Mariana Islands',
+//         'Norway',
+//         'Oman',
+//         'Pakistan',
+//         'Palau',
+//         'Palestinian Territory Occupied',
+//         'Panama',
+//         'Papua New Guinea',
+//         'Paraguay',
+//         'Peru',
+//         'Philippines',
+//         'Pitcairn Island',
+//         'Poland',
+//         'Portugal',
+//         'Puerto Rico',
+//         'Qatar',
+//         'Reunion',
+//         'Romania',
+//         'Russia',
+//         'Rwanda',
+//         'Saint Helena',
+//         'Saint Kitts and Nevis',
+//         'Saint Lucia',
+//         'Saint Pierre and Miquelon',
+//         'Saint Vincent and the Grenadines',
+//         'Saint-Barthelemy',
+//         'Saint-Martin (French part)',
+//         'Samoa',
+//         'San Marino',
+//         'Sao Tome and Principe',
+//         'Saudi Arabia',
+//         'Senegal',
+//         'Serbia',
+//         'Seychelles',
+//         'Sierra Leone',
+//         'Singapore',
+//         'Sint Maarten (Dutch part)',
+//         'Slovakia',
+//         'Slovenia',
+//         'Solomon Islands',
+//         'Somalia',
+//         'South Africa',
+//         'South Georgia',
+//         'South Korea',
+//         'South Sudan',
+//         'Spain',
+//         'Sri Lanka',
+//         'Sudan',
+//         'Suriname',
+//         'Svalbard and Jan Mayen Islands',
+//         'Sweden',
+//         'Switzerland',
+//         'Syria',
+//         'Taiwan',
+//         'Tajikistan',
+//         'Tanzania',
+//         'Thailand',
+//         'The Bahamas',
+//         'The Gambia ',
+//         'Timor-Leste',
+//         'Togo',
+//         'Tokelau',
+//         'Tonga',
+//         'Trinidad and Tobago',
+//         'Tunisia',
+//         'Turkey',
+//         'Turkmenistan',
+//         'Turks and Caicos Islands',
+//         'Tuvalu',
+//         'Uganda',
+//         'Ukraine',
+//         'United Arab Emirates',
+//         'United Kingdom',
+//         'United States',
+//         'United States Minor Outlying Islands',
+//         'Uruguay',
+//         'Uzbekistan',
+//         'Vanuatu',
+//         'Vatican City State (Holy See)',
+//         'Venezuela',
+//         'Vietnam',
+//         'Virgin Islands (British)',
+//         'Virgin Islands (US)',
+//         'Wallis and Futuna Islands',
+//         'Western Sahara',
+//         'Yemen',
+//         'Zambia',
+//         'Zimbabwe'
+//     ];
+//     foreach ($countries as $country) {
+//         if (!term_exists($country, 'country')) {
+//             wp_insert_term($country, 'country');
+//         }
+//     }
+// }
+
+register_activation_hook(__FILE__, function () {
+    inforepo_resource_post_type();
+    register_resource_taxonomies();
+    inforepo_seed_terms(); 
+    // inforepo_update_countries();
+    flush_rewrite_rules();
+});
 
 
 /**
@@ -1107,8 +1122,9 @@ add_action('init', 'inforepo_update_countries');
  * 
  * @return void
  */
-function inforepo_unregister_tags_for_inforepo_resource() {
+// function inforepo_unregister_tags_for_inforepo_resource()
+// {
 
-    unregister_taxonomy_for_object_type( 'country', 'inforepo_resource' );
-}
-add_action('init', 'inforepo_unregister_tags_for_inforepo_resource');
+//     unregister_taxonomy_for_object_type('country', 'inforepo_resource');
+// }
+// add_action('init', 'inforepo_unregister_tags_for_inforepo_resource');
