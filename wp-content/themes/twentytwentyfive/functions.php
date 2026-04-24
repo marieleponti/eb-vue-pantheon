@@ -245,7 +245,8 @@ function inforepo_scripts_styles()
   wp_register_script('post-map-js', INFOREPO_BUILD_JS_URI . '/postMap.js', ['jquery'], filemtime(INFOREPO_BUILD_JS_DIR_PATH . '/postMap.js'), true);
   wp_register_script('jquery', INFOREPO_BUILD_LIB_URI . '/jquery-3.7.1.min.js', [], false, true);
   wp_register_script('js-cookie', 'https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.1/js.cookie.min.js', [], false, true);
-  wp_register_script('loadmore-js', INFOREPO_BUILD_JS_URI . '/loadMore.js', ['jquery'], filemtime(INFOREPO_BUILD_JS_DIR_PATH . '/loadMore.js'), true);
+  //***** replace loaddmore, search, filter with inforepo_api_get_resources */ 
+  // wp_register_script('loadmore-js', INFOREPO_BUILD_JS_URI . '/loadMore.js', ['jquery'], filemtime(INFOREPO_BUILD_JS_DIR_PATH . '/loadMore.js'), true);
 
 
 
@@ -358,24 +359,25 @@ add_filter('nav_menu_link_attributes', 'inforepo_add_anchor_class', 10, 3);
  * 
  * 
  */
-function add_custom_roles()
-{
-  add_role('eb_team', __('EB Team'), get_role('administrator')->capabilities);
-  add_role(
-    'eb_community_member',
-    __('EB Community Member'),
-    array(
-      'delete_posts' => true,
-      'edit_posts'   => true,
-      'read'         => true,
-      'read_private_pages' => true,
-      'read_private_posts' => true,
-      'manage_terms' => true
-    )
-  );
-}
-add_action('init', 'add_custom_roles');
+function inforepo_roles_caps() {
 
+  // EB TEAM
+  $team = get_role('eb_team');
+  if ($team) {
+    $team->add_cap('read_private_posts');
+    $team->add_cap('edit_posts');
+    $team->add_cap('edit_published_posts');
+    $team->add_cap('publish_posts');
+  }
+
+  // COMMUNITY MEMBER
+  $community = get_role('eb_community_member');
+  if ($community) {
+    $community->add_cap('read_private_posts'); 
+  }
+
+}
+add_action('init', 'inforepo_roles_caps');
 
 
 /**
@@ -1605,63 +1607,169 @@ function inforepo_display_post_file()
   }
   add_action('wp_enqueue_scripts', 'get_geo_single_post');
 
-  function inforepo_loadmore()
-  {
-    wp_localize_script('loadmore-js', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+  //***** replace loaddmore, search, filter with inforepo_api_get_resources */ 
+  // function inforepo_loadmore()
+  // {
+  //   wp_localize_script('loadmore-js', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+  // }
+  // add_action('wp_enqueue_scripts', 'inforepo_loadmore');
+
+  // function inforepo_load_more()
+  // {
+  //   $args = array(
+  //     'post_type' => 'inforepo_resource',
+  //     'posts_per_page' => 3,
+  //     'paged' => $_POST['paged'],
+  //     'tax_query' =>  array(
+  //       'relation' => 'AND',
+  //       array(
+  //         'taxonomy' => 'source',
+  //         'field' => 'slug',
+  //         'terms' => array('public-records-requests'),
+  //       ),
+  //       // array(
+  //       //     'taxonomy' => 'research-team',
+  //       //     'field' => 'slug',
+  //       //     'terms' => array('eb-research'),
+  //       // ),
+  //       array(
+  //         'taxonomy' => 'special-content',
+  //         'field' => 'slug',
+  //         'terms' => array('featured')
+  //       )
+  //     ),
+  //   );
+  //   $ajaxposts = new WP_Query($args);
+
+  //   $response = '';
+  //   $max_pages = $ajaxposts->max_num_pages;
+
+  //   if ($ajaxposts->have_posts()) {
+  //     ob_start();
+  //     while ($ajaxposts->have_posts()) : $ajaxposts->the_post();
+  //       $response .= get_template_part('template-parts/case-item-card');
+  //     endwhile;
+  //     $output = ob_get_contents();
+  //     ob_end_clean();
+  //   } else {
+  //     $response = '';
+  //   }
+
+  //   $result = [
+  //     'max' => $max_pages,
+  //     'html' => $output,
+  //   ];
+  //   echo json_encode($result);
+  //   exit;
+  // }
+  // add_action('wp_ajax_inforepo_load_more', 'inforepo_load_more');
+  // add_action('wp_ajax_nopriv_inforepo_load_more', 'inforepo_load_more');
+
+ 
+
+/**
+ * Main endpoint inforepo API get resources
+ * 
+ * This functions replaces legacy loadmore, search, filter by creating an endpoint for the API
+ * 
+ * @param request
+ * @return api response
+ * 
+ * @author marieleponti
+ * @package inforepo
+ * 
+ * 
+ */
+function inforepo_api_get_resources($request)
+{
+  $params = $request->get_params();
+
+  $paged = isset($params['page']) ? intval($params['page']) : 1;
+  $per_page = isset($params['per_page']) ? intval($params['per_page']) : 12;
+  $post_status = ['publish'];
+  if (current_user_can('read_private_posts')) {
+    $post_status[] = 'private';
   }
-  add_action('wp_enqueue_scripts', 'inforepo_loadmore');
+  $args = [
+    'post_type'      => 'inforepo_resource',
+    'post_status' => $post_status,
+    'posts_per_page' => $per_page,
+    'paged'          => $paged,
+  ];
 
-  function inforepo_load_more()
-  {
-    $args = array(
-      'post_type' => 'inforepo_resource',
-      'posts_per_page' => 3,
-      'paged' => $_POST['paged'],
-      'tax_query' =>  array(
-        'relation' => 'AND',
-        array(
-          'taxonomy' => 'source',
-          'field' => 'slug',
-          'terms' => array('public-records-requests'),
-        ),
-        // array(
-        //     'taxonomy' => 'research-team',
-        //     'field' => 'slug',
-        //     'terms' => array('eb-research'),
-        // ),
-        array(
-          'taxonomy' => 'special-content',
-          'field' => 'slug',
-          'terms' => array('featured')
-        )
-      ),
-    );
-    $ajaxposts = new WP_Query($args);
+  /* -------------------------
+   * SEARCH
+   * ------------------------- */
+  if (!empty($params['search'])) {
+    $args['s'] = sanitize_text_field($params['search']);
+  }
 
-    $response = '';
-    $max_pages = $ajaxposts->max_num_pages;
+  /* -------------------------
+   * TAX FILTERS
+   * ------------------------- */
+  $tax_query = [];
 
-    if ($ajaxposts->have_posts()) {
-      ob_start();
-      while ($ajaxposts->have_posts()) : $ajaxposts->the_post();
-        $response .= get_template_part('template-parts/case-item-card');
-      endwhile;
-      $output = ob_get_contents();
-      ob_end_clean();
-    } else {
-      $response = '';
+  $taxonomies = ['topic', 'source', 'format', 'country', 'language'];
+
+  foreach ($taxonomies as $tax) {
+    if (!empty($params[$tax])) {
+
+      $terms = explode(',', sanitize_text_field($params[$tax]));
+
+      $tax_query[] = [
+        'taxonomy' => $tax,
+        'field'    => 'slug',
+        'terms'    => $terms,
+      ];
     }
-
-    $result = [
-      'max' => $max_pages,
-      'html' => $output,
-    ];
-    echo json_encode($result);
-    exit;
   }
-  add_action('wp_ajax_inforepo_load_more', 'inforepo_load_more');
-  add_action('wp_ajax_nopriv_inforepo_load_more', 'inforepo_load_more');
 
+  if (!empty($tax_query)) {
+    $args['tax_query'] = $tax_query;
+  }
+
+  /* -------------------------
+   * QUERY
+   * ------------------------- */
+  $query = new WP_Query($args);
+
+  $items = [];
+
+  while ($query->have_posts()) {
+    $query->the_post();
+
+    $id = get_the_ID();
+
+    $items[] = [
+      'id'      => $id,
+      'title'   => get_the_title(),
+      'excerpt' => get_the_excerpt(),
+      'date'    => get_the_date('Y-m-d'),
+
+      // ACF limpio (mejor que get_fields completo)
+      'acf' => [
+        'description' => get_field('description', $id),
+        'author'      => get_field('author', $id),
+        'link'        => get_field('link_to_resource', $id),
+      ],
+
+      'taxonomies' => [
+        'topic'    => wp_get_post_terms($id, 'topic', ['fields' => 'slugs']),
+        'source'   => wp_get_post_terms($id, 'source', ['fields' => 'slugs']),
+        'format'   => wp_get_post_terms($id, 'format', ['fields' => 'slugs']),
+        'country'  => wp_get_post_terms($id, 'country', ['fields' => 'slugs']),
+        'language' => wp_get_post_terms($id, 'language', ['fields' => 'slugs']),
+      ]
+    ];
+  }
+
+  return rest_ensure_response([
+    'items' => $items,
+    'total' => $query->found_posts,
+    'pages' => $query->max_num_pages,
+    'page'  => $paged,
+  ]);
+}
 
 
   /***
@@ -1762,6 +1870,17 @@ add_action('rest_api_init', function () {
 
     return $value;
   });
+});
+
+//  Create namespace for API
+add_action('rest_api_init', function () {
+
+  register_rest_route('inforepo/v1', '/resources', [
+    'methods'  => 'GET',
+    'callback' => 'inforepo_api_get_resources',
+    'permission_callback' => '__return_true'
+  ]);
+
 });
 
 /*************************    Register strings for internationalization   *****************************/
