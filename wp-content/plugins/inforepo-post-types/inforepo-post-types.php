@@ -24,6 +24,8 @@
 
 if (!defined('ABSPATH')) die();
 
+require_once plugin_dir_path(__FILE__) . 'includes/rest-api/filters.php';
+
 // Register Custom Post Type
 function inforepo_resource_post_type()
 {
