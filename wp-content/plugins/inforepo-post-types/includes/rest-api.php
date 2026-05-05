@@ -11,7 +11,12 @@ add_action('rest_api_init', function () {
     ]);
 });
 
+// function inforepo_get_filters()
+// {
+//     return rest_ensure_response(get_filters_data());
+// }
+
 function inforepo_get_filters()
 {
-    return rest_ensure_response(get_filters_data());
+    return rest_ensure_response(['test' => 'ok']);
 }
