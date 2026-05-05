@@ -25,6 +25,7 @@
 if (!defined('ABSPATH')) die();
 
 require_once plugin_dir_path(__FILE__) . 'includes/rest-api.php';
+require_once plugin_dir_path(__FILE__) . 'includes/helpers.php'; 
 
 // Register Custom Post Type
 function inforepo_resource_post_type()
