@@ -11,12 +11,10 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-// function inforepo_get_filters()
-// {
-//     return rest_ensure_response(get_filters_data());
-// }
+
+error_log('REST API LOADED');
 
 function inforepo_get_filters()
 {
-    return rest_ensure_response(['test' => 'ok']);
+    return rest_ensure_response(get_filters_data());
 }
