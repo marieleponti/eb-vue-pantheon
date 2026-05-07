@@ -14,9 +14,6 @@ function inforepo_register_routes() {
     ]);
 }
 
-
-error_log('REST API LOADED');
-
 function inforepo_get_filters()
 {
     return rest_ensure_response(get_filters_data());
