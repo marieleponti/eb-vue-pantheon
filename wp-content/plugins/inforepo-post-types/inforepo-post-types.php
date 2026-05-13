@@ -67,7 +67,7 @@ function inforepo_resource_post_type()
         'supports'              => array('title', 'editor', 'excerpt', 'author', 'thumbnail', 'comments', 'revisions', 'custom-fields', 'page-attributes'),
         'hierarchical'          => false, // cuando es verdad, funciona como página
         'public'                => true, //Whether a post type is intended for use publicly either via the admin interface or by front-end users. 
-        'show_in_rest'          => true,
+        'show_in_rest'          => false,
         'show_ui'               => true,
         'show_in_menu'          => true,
         'menu_position'         => 6,
