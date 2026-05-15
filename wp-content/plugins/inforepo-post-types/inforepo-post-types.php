@@ -79,7 +79,7 @@ function inforepo_resource_post_type()
         // 'posts_per_page'        => -1,
         'exclude_from_search'   => false, // Whether to exclude posts with this post type from front end search results
         'publicly_queryable'    => true, // Whether queries can be performed on the front end for the post type as part of parse_request().
-        'capability_type'       => 'inforepo_resource',
+        'capability_type'       => 'post',
         'map_meta_cap'          => true,
         'query_var'             => true,
         'rewrite'               => array('slug' => 'resources')
