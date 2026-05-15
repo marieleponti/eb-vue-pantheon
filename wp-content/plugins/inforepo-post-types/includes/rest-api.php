@@ -21,6 +21,12 @@ add_action('rest_api_init', function () {
     }
   ]);
 
+  register_rest_field('inforepo_resource', 'featured_image_url', [
+  'get_callback' => function($post) {
+    return get_the_post_thumbnail_url($post['id'], 'full');
+  }
+]);
+
 });
 
 function get_private_resources() {
