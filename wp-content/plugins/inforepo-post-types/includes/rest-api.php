@@ -5,27 +5,46 @@ if (! defined('ABSPATH')) {
 
 add_action('rest_api_init', function () {
 
-//PUBLIC -> REST ROUTE FOR PUBLIC RESOURCES
-  register_rest_route('ebinforepo/v1', '/resources', [
-    'methods' => 'GET',
-    'callback' => 'get_public_resources',
-    'permission_callback' => '__return_true',
-  ]);
+// Commenting out because we're replacing public and private endpoints for 
+//current user endpoint
+// //PUBLIC -> REST ROUTE FOR PUBLIC RESOURCES
+//   register_rest_route('ebinforepo/v1', '/resources', [
+//     'methods' => 'GET',
+//     'callback' => 'get_public_resources',
+//     'permission_callback' => '__return_true',
+//   ]);
 
-  //PRIVATE -> REST ROUTE FOR PRIVATE RESOURCES
-  register_rest_route('ebinforepo/v1', '/community-resources', [
-    'methods' => 'GET',
-    'callback' => 'get_private_resources',
-    'permission_callback' => function () {
-        return is_user_logged_in() && current_user_can('read_private_posts');
-    }
-  ]);
+//   //PRIVATE -> REST ROUTE FOR PRIVATE RESOURCES
+//   register_rest_route('ebinforepo/v1', '/community-resources', [
+//     'methods' => 'GET',
+//     'callback' => 'get_private_resources',
+//     'permission_callback' => function () {
+//         return is_user_logged_in() && current_user_can('read_private_posts');
+//     }
+//   ]);
 
   register_rest_field('inforepo_resource', 'featured_image_url', [
   'get_callback' => function($post) {
     return get_the_post_thumbnail_url($post['id'], 'full');
   }
 ]);
+
+// CREATE REST ENDPOINT IN WP FOR CURRENT USER
+  register_rest_route('ebinforepo/v1', '/me', [
+    'methods' => 'GET',
+    'permission_callback' => function () {
+      return is_user_logged_in();
+    },
+    'callback' => function () {
+      $user = wp_get_current_user();
+
+      return [
+        'id' => $user->ID,
+        'roles' => $user->roles,
+        'caps' => $user->allcaps,
+      ];
+    }
+  ]);
 
 });
 
