@@ -66,7 +66,7 @@ $table_prefix = 'wp_';
  * It is strongly recommended that plugin and theme developers use WP_DEBUG
  * in their development environments.
  *
- * You may want to examine $_ENV['PANTHEON_ENVIRONMENT'] to set this to be
+ * You may want to examine $_ENV['PANTHEON_ENVIRONMENT'] to set this to be	
  * "true" in dev, but false in test and live.
  */
 if ( ! defined( 'WP_DEBUG' ) ) {
@@ -75,7 +75,6 @@ if ( ! defined( 'WP_DEBUG' ) ) {
 
 
 define('JWT_AUTH_SECRET_KEY', 'lM)h$-*s$cxDyV*!MA8KUie{>)&@dMN1f{,0OL1lv-5mt*E$gda&Nz,aLG(C9^({');
-// define('JWT_AUTH_SECRET_KEY', '<Zwnv6>kbH*%qz;Kf8oHk@R-Nz-08-S5SOxqTT=S%icz,u9ImdG)B}Ve#s<+zj].');
 
 define('JWT_AUTH_CORS_ENABLE', true);
 

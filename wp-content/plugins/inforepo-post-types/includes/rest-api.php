@@ -46,6 +46,13 @@ add_action('rest_api_init', function () {
     }
   ]);
 
+// CREATE REST ENDPOINT IN WP FOR FILTERS
+  register_rest_route('ebinforepo/v1', '/filters', [
+  'methods' => 'GET',
+  'permission_callback' => '__return_true',
+  'callback' => 'inforepo_get_filters',
+]);
+
 });
 
 function get_private_resources() {
