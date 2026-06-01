@@ -111,7 +111,16 @@ function get_resources_handler($request) {
 
   $tax_query = [];
 
-  foreach (['topic','country','format','source','language'] as $tax) {
+  foreach ([
+  'topic',
+  'country',
+  'format',
+  'source',
+  'language',
+  'research-team',
+  'special-content',
+  'authoring-organization'
+] as $tax) {
     if (!empty($params[$tax])) {
       $tax_query[] = [
         'taxonomy' => $tax,
@@ -126,6 +135,9 @@ function get_resources_handler($request) {
   }
 
   $query = new WP_Query($args);
+
+  error_log(print_r($params, true));
+  error_log(print_r($args, true));
 
   $items = array_map(function($post) {
     return [
