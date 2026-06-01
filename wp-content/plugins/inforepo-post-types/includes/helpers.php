@@ -70,3 +70,78 @@ function build_taxonomy_tree(string $taxonomy, string $label): array
         'children' => $build_tree(0),
     ];
 }
+
+
+function get_private_resources() {
+  return get_posts([
+    'post_type' => 'inforepo_resource',
+    'post_status' => ['publish', 'private'],
+    'numberposts' => -1,
+  ]);
+}
+
+function get_public_resources() {
+
+    return get_posts([
+        'post_type' => 'inforepo_resource',
+        'post_status' => 'publish',
+        'numberposts' => -1,
+    ]);
+
+}
+
+function inforepo_get_filters()
+{
+    return rest_ensure_response(get_filters_data());
+}
+
+function get_resources_handler($request) {
+
+  $params = $request->get_params();
+
+  $paged = isset($params['page']) ? (int) $params['page'] : 1;
+  $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
+
+  $args = [
+    'post_type'      => 'inforepo_resource',
+    'post_status'    => 'publish',
+    'posts_per_page' => $per_page,
+    'paged'          => $paged,
+  ];
+
+  $tax_query = [];
+
+  foreach (['topic','country','format','source','language'] as $tax) {
+    if (!empty($params[$tax])) {
+      $tax_query[] = [
+        'taxonomy' => $tax,
+        'field'    => 'slug',
+        'terms'    => explode(',', $params[$tax]),
+      ];
+    }
+  }
+
+  if (!empty($tax_query)) {
+    $args['tax_query'] = $tax_query;
+  }
+
+  $query = new WP_Query($args);
+
+  $items = array_map(function($post) {
+    return [
+      'id' => $post->ID,
+      'title' => get_the_title($post),
+      'excerpt' => get_the_excerpt($post),
+      'date' => get_the_date('', $post),
+      'permalink' => get_permalink($post),
+      'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
+    ];
+  }, $query->posts);
+
+  return rest_ensure_response([
+    'items'        => $items,
+    'total'        => $query->found_posts,
+    'total_pages'  => $query->max_num_pages,
+  ]);
+}
+
