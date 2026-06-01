@@ -134,6 +134,7 @@ function get_resources_handler($request) {
     $args['tax_query'] = $tax_query;
   }
 
+  error_log('FINAL ARGS: ' . print_r($args, true));
   $query = new WP_Query($args);
 
   error_log(print_r($params, true));
