@@ -125,7 +125,7 @@ function get_resources_handler($request) {
       $tax_query[] = [
         'taxonomy' => $tax,
         'field'    => 'slug',
-        'terms'    => explode(',', $params[$tax]),
+        'terms' => (array) $params[$tax],
       ];
     }
   }
