@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Get Filters data (optimized).
  */
@@ -20,7 +21,7 @@ function build_taxonomy_tree(string $taxonomy, string $label): array
 {
     $terms = get_terms([
         'taxonomy'   => $taxonomy,
-        'hide_empty' => true, 
+        'hide_empty' => true,
     ]);
 
     if (is_wp_error($terms) || empty($terms)) {
@@ -72,22 +73,23 @@ function build_taxonomy_tree(string $taxonomy, string $label): array
 }
 
 
-function get_private_resources() {
-  return get_posts([
-    'post_type' => 'inforepo_resource',
-    'post_status' => ['publish', 'private'],
-    'numberposts' => -1,
-  ]);
+function get_private_resources()
+{
+    return get_posts([
+        'post_type' => 'inforepo_resource',
+        'post_status' => ['publish', 'private'],
+        'numberposts' => -1,
+    ]);
 }
 
-function get_public_resources() {
+function get_public_resources()
+{
 
     return get_posts([
         'post_type' => 'inforepo_resource',
         'post_status' => 'publish',
         'numberposts' => -1,
     ]);
-
 }
 
 function inforepo_get_filters()
@@ -95,66 +97,71 @@ function inforepo_get_filters()
     return rest_ensure_response(get_filters_data());
 }
 
-function get_resources_handler($request) {
+function get_resources_handler($request)
+{
 
-  $params = $request->get_params();
+    $params = $request->get_params();
 
-  $paged = isset($params['page']) ? (int) $params['page'] : 1;
-  $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
+    error_log('REQUEST PARAMS: ' . print_r($request->get_params(), true));
+    error_log('COUNTRY PARAM: ' . print_r($request->get_param('country'), true));
 
-  $args = [
-    'post_type'      => 'inforepo_resource',
-    'post_status'    => 'publish',
-    'posts_per_page' => $per_page,
-    'paged'          => $paged,
-  ];
+    $paged = isset($params['page']) ? (int) $params['page'] : 1;
+    $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
 
-  $tax_query = [];
-
-  foreach ([
-  'topic',
-  'country',
-  'format',
-  'source',
-  'language',
-  'research-team',
-  'special-content',
-  'authoring-organization'
-] as $tax) {
-    if (!empty($params[$tax])) {
-      $tax_query[] = [
-        'taxonomy' => $tax,
-        'field'    => 'slug',
-        'terms' => (array) $params[$tax],
-      ];
-    }
-  }
-
-  if (!empty($tax_query)) {
-    $args['tax_query'] = $tax_query;
-  }
-
-  error_log('FINAL ARGS: ' . print_r($args, true));
-  $query = new WP_Query($args);
-
-  error_log(print_r($params, true));
-  error_log(print_r($args, true));
-
-  $items = array_map(function($post) {
-    return [
-      'id' => $post->ID,
-      'title' => get_the_title($post),
-      'excerpt' => get_the_excerpt($post),
-      'date' => get_the_date('', $post),
-      'permalink' => get_permalink($post),
-      'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
+    $args = [
+        'post_type'      => 'inforepo_resource',
+        'post_status'    => 'publish',
+        'posts_per_page' => $per_page,
+        'paged'          => $paged,
     ];
-  }, $query->posts);
 
-  return rest_ensure_response([
-    'items'        => $items,
-    'total'        => $query->found_posts,
-    'total_pages'  => $query->max_num_pages,
-  ]);
+    $tax_query = [];
+
+    foreach (
+        [
+            'topic',
+            'country',
+            'format',
+            'source',
+            'language',
+            'research-team',
+            'special-content',
+            'authoring-organization'
+        ] as $tax
+    ) {
+        if (!empty($params[$tax])) {
+            $tax_query[] = [
+                'taxonomy' => $tax,
+                'field'    => 'slug',
+                'terms' => array_map('sanitize_title', (array) $params[$tax]),
+            ];
+        }
+    }
+
+    if (!empty($tax_query)) {
+        $args['tax_query'] = $tax_query;
+    }
+
+    error_log('FINAL ARGS: ' . print_r($args, true));
+    $query = new WP_Query($args);
+
+    error_log(print_r($params, true));
+    error_log(print_r($args, true));
+
+    $items = array_map(function ($post) {
+        return [
+            'id' => $post->ID,
+            'title' => get_the_title($post),
+            'excerpt' => get_the_excerpt($post),
+            'date' => get_the_date('', $post),
+            'permalink' => get_permalink($post),
+            'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
+        ];
+    }, $query->posts);
+
+    return rest_ensure_response([
+        'items'        => $items,
+        'total'        => $query->found_posts,
+        'total_pages'  => $query->max_num_pages,
+    ]);
 }
-
