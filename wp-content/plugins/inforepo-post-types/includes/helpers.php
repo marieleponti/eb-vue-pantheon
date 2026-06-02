@@ -149,19 +149,20 @@ function get_resources_handler($request)
     error_log(print_r($args, true));
 
     $items = array_map(function ($post) {
+
         return [
-            'id' => $post->ID,
-            'title' => get_the_title($post),
-            'excerpt' => get_the_excerpt($post),
-            'date' => get_the_date('', $post),
-            'permalink' => get_permalink($post),
+            'id'         => $post->ID,
+            'title'      => get_the_title($post),
+            'excerpt'    => get_the_excerpt($post),
+            'date'       => get_the_date('', $post),
+            'permalink'  => get_permalink($post),
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
         ];
     }, $query->posts);
 
     return rest_ensure_response([
-        'items'        => $items,
-        'total'        => $query->found_posts,
-        'total_pages'  => $query->max_num_pages,
+        'items'       => $items,
+        'total'       => $query->found_posts,
+        'total_pages' => $query->max_num_pages,
     ]);
 }
