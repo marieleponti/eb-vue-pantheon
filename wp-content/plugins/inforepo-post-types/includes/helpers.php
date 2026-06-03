@@ -110,10 +110,14 @@ function get_resources_handler($request)
 
     $args = [
         'post_type'      => 'inforepo_resource',
-        'post_status'    => 'publish',
+        'post_status' => ['publish', 'private'],
         'posts_per_page' => $per_page,
         'paged'          => $paged,
     ];
+
+    if (!is_user_logged_in()) {
+        $args['post_status'] = 'publish';
+    }
 
     $tax_query = [];
 
