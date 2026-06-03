@@ -5,11 +5,17 @@ if (! defined('ABSPATH')) {
 
 add_action('rest_api_init', function () {
 
-
 register_rest_route('ebinforepo/v1', '/resources', [
   'methods' => 'GET',
   'permission_callback' => '__return_true',
-  'callback' => 'get_resources_handler',
+
+  'callback' => function ($request) {
+
+    error_log('CURRENT USER: ' . print_r(wp_get_current_user(), true));
+    error_log('IS USER LOGGED IN: ' . (is_user_logged_in() ? 'YES' : 'NO'));
+
+    return get_resources_handler($request);
+  }
 ]);
 
   register_rest_field('inforepo_resource', 'featured_image_url', [
