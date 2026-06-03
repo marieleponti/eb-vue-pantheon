@@ -133,7 +133,7 @@ function get_resources_handler($request)
             $tax_query[] = [
                 'taxonomy' => $tax,
                 'field'    => 'slug',
-                'terms' => array_map('sanitize_title', (array) $params[$tax]),
+                'terms' => array_map('sanitize_title', explode(',', $params[$tax])),
             ];
         }
     }
