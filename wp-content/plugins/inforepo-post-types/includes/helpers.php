@@ -167,13 +167,14 @@ function get_resources_handler($request)
     }, $query->posts);
 
     return rest_ensure_response([
-        'debug' => [
-            'user_id' => $user->ID,
-            'logged_in' => is_user_logged_in(),
-            'roles' => $user->roles ?? [],
-        ],
-        'items' => $items,
-        'total' => $query->found_posts,
-        'total_pages' => $query->max_num_pages,
+        // 'debug' => [
+        //     'user_id' => $user->ID,
+        //     'logged_in' => is_user_logged_in(),
+        //     'roles' => $user->roles ?? [],
+        // ],
+        // 'items' => $items,
+        // 'total' => $query->found_posts,
+        // 'total_pages' => $query->max_num_pages,
+        'TEST' => 'PHP MODIFICADO',
     ]);
 }
