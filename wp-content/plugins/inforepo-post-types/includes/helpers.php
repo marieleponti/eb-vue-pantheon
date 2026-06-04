@@ -102,8 +102,10 @@ function get_resources_handler($request)
 
     $params = $request->get_params();
 
-    error_log('REQUEST PARAMS: ' . print_r($request->get_params(), true));
-    error_log('COUNTRY PARAM: ' . print_r($request->get_param('country'), true));
+    $user = wp_get_current_user();
+
+    error_log('USER ID: ' . $user->ID);
+    error_log('LOGGED IN: ' . (is_user_logged_in() ? 'YES' : 'NO'));
 
     $paged = isset($params['page']) ? (int) $params['page'] : 1;
     $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
@@ -165,8 +167,13 @@ function get_resources_handler($request)
     }, $query->posts);
 
     return rest_ensure_response([
-        'items'       => $items,
-        'total'       => $query->found_posts,
+        'debug' => [
+            'user_id' => $user->ID,
+            'logged_in' => is_user_logged_in(),
+            'roles' => $user->roles ?? [],
+        ],
+        'items' => $items,
+        'total' => $query->found_posts,
         'total_pages' => $query->max_num_pages,
     ]);
 }
