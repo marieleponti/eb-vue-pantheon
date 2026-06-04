@@ -176,5 +176,11 @@ function get_resources_handler($request)
         // 'total' => $query->found_posts,
         // 'total_pages' => $query->max_num_pages,
         'TEST' => 'PHP MODIFICADO',
+   
+    'debug' => [
+        'user_id' => $user->ID,
+        'logged_in' => is_user_logged_in(),
+        'roles' => $user->roles ?? [],
+    ],
     ]);
 }
