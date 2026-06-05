@@ -99,13 +99,8 @@ function inforepo_get_filters()
 
 function get_resources_handler($request)
 {
-
     $params = $request->get_params();
-
     $user = wp_get_current_user();
-
-    error_log('USER ID: ' . $user->ID);
-    error_log('LOGGED IN: ' . (is_user_logged_in() ? 'YES' : 'NO'));
 
     $paged = isset($params['page']) ? (int) $params['page'] : 1;
     $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
@@ -148,12 +143,7 @@ function get_resources_handler($request)
         $args['tax_query'] = $tax_query;
     }
 
-    error_log('FINAL ARGS: ' . print_r($args, true));
     $query = new WP_Query($args);
-
-    error_log(print_r($params, true));
-    error_log(print_r($args, true));
-
     $items = array_map(function ($post) {
 
         return [
@@ -168,6 +158,7 @@ function get_resources_handler($request)
 
     return rest_ensure_response([
         'debug' => [
+            'auth_header' => $_SERVER['HTTP_AUTHORIZATION'] ?? 'MISSING',
             'user_id' => $user->ID,
             'logged_in' => is_user_logged_in(),
             'roles' => $user->roles ?? [],
