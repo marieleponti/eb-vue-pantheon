@@ -159,6 +159,8 @@ function get_resources_handler($request)
     return rest_ensure_response([
         'debug' => [
             'auth_header' => $_SERVER['HTTP_AUTHORIZATION'] ?? 'MISSING',
+            'server_auth' => $_SERVER['HTTP_AUTHORIZATION'] ?? 'MISSING',
+            'apache_auth' => $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? 'MISSING',
             'user_id' => $user->ID,
             'logged_in' => is_user_logged_in(),
             'roles' => $user->roles ?? [],
