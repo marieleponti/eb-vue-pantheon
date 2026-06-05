@@ -81,7 +81,13 @@ define('JWT_AUTH_SECRET_KEY', 'lM)h$-*s$cxDyV*!MA8KUie{>)&@dMN1f{,0OL1lv-5mt*E$g
 
 define('JWT_AUTH_CORS_ENABLE', true);
 
-if (isset($_SERVER['HTTP_AUTHORIZATION'])) { $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] = $_SERVER['HTTP_AUTHORIZATION']; }
+$auth = $_SERVER['HTTP_AUTHORIZATION']
+    ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
+    ?? '';
+
+if ($auth) {
+    $_SERVER['HTTP_AUTHORIZATION'] = $auth;
+}
 
 /* That's all, stop editing! Happy Pressing. */
 
