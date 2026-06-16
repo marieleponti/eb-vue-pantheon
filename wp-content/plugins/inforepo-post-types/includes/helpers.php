@@ -104,6 +104,7 @@ function get_resources_handler($request)
 
     $paged = isset($params['page']) ? (int) $params['page'] : 1;
     $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
+    $slug = isset($params['slug']) ? sanitize_title($params['slug']) : null;
 
     $args = [
         'post_type'      => 'inforepo_resource',
@@ -143,14 +144,18 @@ function get_resources_handler($request)
         $args['tax_query'] = $tax_query;
     }
 
+    if (!empty($slug)) {
+    $args['name'] = $slug; 
+    }
+
     $query = new WP_Query($args);
     $items = array_map(function ($post) {
-
         return [
             'id'         => $post->ID,
+            'slug'       => $post->post_name, 
             'title'      => get_the_title($post),
             'excerpt'    => get_the_excerpt($post),
-            'date'       => get_the_date('', $post),
+            'content'    => apply_filters('the_content', $post->post_content), 
             'permalink'  => get_permalink($post),
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
         ];
