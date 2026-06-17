@@ -101,84 +101,41 @@ function inforepo_get_filters()
  */
 function get_resources_handler($request)
 {
-    $params = $request->get_params();
     $user = wp_get_current_user();
 
-    $paged = isset($params['page']) ? (int) $params['page'] : 1;
-    $per_page = isset($params['per_page']) ? (int) $params['per_page'] : 16;
-    $slug = isset($params['slug']) ? sanitize_title($params['slug']) : null;
+    $can_see_private = (
+        is_user_logged_in() &&
+        (
+            user_can($user, 'read_private_posts') ||
+            user_can($user, 'edit_others_posts')
+        )
+    );
 
-    $user = wp_get_current_user();
-
-    $can_see_private =
-        current_user_can('read_private_posts') ||
-        current_user_can('edit_others_posts');
+    $paged = (int) ($request['page'] ?? 1);
+    $per_page = (int) ($request['per_page'] ?? 16);
+    $slug = sanitize_title($request['slug'] ?? '');
 
     $args = [
         'post_type'      => 'inforepo_resource',
         'posts_per_page' => $per_page,
         'paged'          => $paged,
+        'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
     ];
 
-    if ($can_see_private) {
-        $args['post_status'] = ['publish', 'private'];
-    } else {
-        $args['post_status'] = ['publish'];
-    }
-
-    $tax_query = [];
-
-    // Ajustamos la verificación de parámetros a los slugs exactos de tu CPT
-    foreach (
-        [
-            'topic',
-            'country',
-            'format',
-            'source', 
-            'language',
-            'research-team',
-            'special-content',
-            'authoring-organization',
-            'city-community' // Añadido para soportar filtros por URL si lo necesitas después
-        ] as $tax
-    ) {
-        // Soporte dinámico por si el frontend manda el query como 'source' o 'sources'
-        $param_key = ($tax === 'sources' && empty($params['sources']) && !empty($params['source'])) ? 'source' : $tax;
-
-        if (!empty($params[$param_key])) {
-            $tax_query[] = [
-                'taxonomy' => $tax,
-                'field'    => 'slug',
-                'terms'    => array_map('sanitize_title', explode(',', $params[$param_key])),
-            ];
-        }
-    }
-
-    if (!empty($tax_query)) {
-        $args['tax_query'] = $tax_query;
-    }
-
     if (!empty($slug)) {
-        $args['name'] = $slug; 
+        $args['name'] = $slug;
+        $args['posts_per_page'] = 1;
     }
 
     $query = new WP_Query($args);
-    
-    // ¡AQUÍ ESTÁ LA MAGIA! Ejecutamos tu formateador optimizado con ACF y Taxonomías
-    $formatted_data = inforepo_format_resources_response($query);
+
+    $formatted = inforepo_format_resources_response($query);
 
     return rest_ensure_response([
-        'debug' => [
-            'auth_header' => $_SERVER['HTTP_AUTHORIZATION'] ?? 'MISSING',
-            'server_auth' => $_SERVER['HTTP_AUTHORIZATION'] ?? 'MISSING',
-            'apache_auth' => $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? 'MISSING',
-            'user_id'     => $user->ID,
-            'logged_in'   => is_user_logged_in(),
-            'roles'       => $user->roles ?? [],
-        ],
-        'items'       => $formatted_data['items'],
-        'total'       => $formatted_data['total'],
-        'total_pages' => $query->max_num_pages,   
+        'items'       => $formatted['items'],
+        'total'       => $formatted['total'],
+        'total_pages' => $query->max_num_pages,
+        'item'        => $formatted['items'][0] ?? null,
     ]);
 }
 
