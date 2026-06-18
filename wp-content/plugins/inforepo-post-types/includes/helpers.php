@@ -118,18 +118,14 @@ function get_resources_handler($request)
 
     $formatted = inforepo_format_resources_response($query);
 
-    if (empty($formatted['items'])) {
-        $formatted = [
-            'items' => [],
-            'total' => 0
-        ];
-    }
+    $items = $formatted['items'] ?? [];
+    $total = $formatted['total'] ?? 0;
 
     return rest_ensure_response([
-        'items'       => array_values($formatted['items']),
-        'total'       => (int) $formatted['total'],
+        'items'       => array_values($items),
+        'total'       => (int) $total,
         'total_pages' => (int) $query->max_num_pages,
-        'item'        => $formatted['items'][0] ?? null,
+        'item'        => $items[0] ?? null,
     ]);
 }
 
