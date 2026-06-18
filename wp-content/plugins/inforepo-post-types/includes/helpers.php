@@ -116,15 +116,19 @@ function get_resources_handler($request)
 
     $query = new WP_Query($args);
 
-    $formatted = inforepo_format_resources_response($query) ?: [
-        'items' => [],
-        'total' => 0
-    ];
+    $formatted = inforepo_format_resources_response($query);
+
+    if (!$formatted) {
+        $formatted = [
+            'items' => [],
+            'total' => 0
+        ];
+    }
 
     return rest_ensure_response([
-        'items'       => $formatted['items'],
-        'total'       => $formatted['total'],
-        'total_pages' => $query->max_num_pages,
+        'items'       => array_values($formatted['items']),
+        'total'       => (int) $formatted['total'],
+        'total_pages' => (int) $query->max_num_pages,
         'item'        => $formatted['items'][0] ?? null,
     ]);
 }
