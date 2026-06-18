@@ -118,7 +118,7 @@ function get_resources_handler($request)
 
     $formatted = inforepo_format_resources_response($query);
 
-    if (!$formatted) {
+    if (empty($formatted['items'])) {
         $formatted = [
             'items' => [],
             'total' => 0
