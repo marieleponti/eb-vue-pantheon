@@ -73,14 +73,6 @@ function build_taxonomy_tree(string $taxonomy, string $label): array
     ];
 }
 
-function get_private_resources()
-{
-    return get_posts([
-        'post_type' => 'inforepo_resource',
-        'post_status' => ['publish', 'private'],
-        'numberposts' => -1,
-    ]);
-}
 
 function get_public_resources()
 {
@@ -101,15 +93,10 @@ function inforepo_get_filters()
  */
 function get_resources_handler($request)
 {
-    $user = wp_get_current_user();
+    $current_user = wp_get_current_user();
 
-    $can_see_private = (
-        is_user_logged_in() &&
-        (
-            user_can($user, 'read_private_posts') ||
-            user_can($user, 'edit_others_posts')
-        )
-    );
+    $can_see_private =
+        !empty($current_user->ID) && user_can($current_user, 'read_private_posts');
 
     $paged = (int) ($request['page'] ?? 1);
     $per_page = (int) ($request['per_page'] ?? 16);
@@ -129,7 +116,10 @@ function get_resources_handler($request)
 
     $query = new WP_Query($args);
 
-    $formatted = inforepo_format_resources_response($query);
+    $formatted = inforepo_format_resources_response($query) ?: [
+        'items' => [],
+        'total' => 0
+    ];
 
     return rest_ensure_response([
         'items'       => $formatted['items'],
