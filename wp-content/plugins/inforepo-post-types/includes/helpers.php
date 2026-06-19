@@ -131,7 +131,7 @@ function get_resources_handler($request)
         ];
     }
 
-    if (!empty($tax_query)) {
+    if (count($tax_query) > 1) {
         $args['tax_query'] = $tax_query;
     }
 
