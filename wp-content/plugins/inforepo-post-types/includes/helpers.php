@@ -110,8 +110,8 @@ function get_resources_handler($request)
         'paged'          => $paged,
         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
     ];
-    
-    $tax_query = [];
+
+    $tax_query['relation'] = 'AND';
 
     if (!empty($source)) {
         $tax_query[] = [
@@ -130,7 +130,6 @@ function get_resources_handler($request)
     }
 
     if (!empty($tax_query)) {
-        $tax_query['relation'] = 'AND';
         $args['tax_query'] = $tax_query;
     }
 
