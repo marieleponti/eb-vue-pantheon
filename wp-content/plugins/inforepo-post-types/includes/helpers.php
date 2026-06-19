@@ -91,6 +91,73 @@ function inforepo_get_filters()
 /**
  * REST API Handler for Resources Catalogue and Single view
  */
+// function get_resources_handler($request)
+// {
+//     $current_user = wp_get_current_user();
+
+//     $can_see_private =
+//         !empty($current_user->ID) && user_can($current_user, 'read_private_posts');
+
+//     $paged = (int) ($request['page'] ?? 1);
+//     $per_page = (int) ($request['per_page'] ?? 16);
+//     $slug = sanitize_text_field($request['slug'] ?? '');
+//     $source = sanitize_text_field($request['source'] ?? '');
+//     $research_team = sanitize_text_field($request['research-team'] ?? '');
+
+//     $args = [
+//         'post_type'      => 'inforepo_resource',
+//         'posts_per_page' => min($per_page, 50),
+//         'paged'          => $paged,
+//         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
+//         'orderby'        => 'date',
+//         'order'          => 'DESC',
+//     ];
+
+//     $tax_query = [];
+
+//     if (!empty($source)) {
+//         $tax_query[] = [
+//             'taxonomy' => 'source',
+//             'field'    => 'slug',
+//             'terms'    => $source,
+//         ];
+//     }
+
+//     if (!empty($research_team)) {
+//         $tax_query[] = [
+//             'taxonomy' => 'research-team',
+//             'field'    => 'slug',
+//             'terms'    => $research_team,
+//         ];
+//     }
+
+//     if (!empty($tax_query)) {
+//     $tax_query = array_merge(
+//         ['relation' => 'AND'],
+//         $tax_query
+//     );
+//         $args['tax_query'] = $tax_query;
+//     }
+
+//     if (!empty($slug)) {
+//         $args['name'] = $slug;
+//         $args['posts_per_page'] = 1;
+//     }
+
+//     $query = new WP_Query($args);
+
+//     $formatted = inforepo_format_resources_response($query);
+
+//     $items = $formatted['items'] ?? [];
+//     $total = $formatted['total'] ?? 0;
+
+//     return rest_ensure_response([
+//         'items'       => array_values($items),
+//         'total'       => (int) $total,
+//         'total_pages' => (int) $query->max_num_pages,
+//         'item'        => $items[0] ?? null,
+//     ]);
+// }
 function get_resources_handler($request)
 {
     $current_user = wp_get_current_user();
@@ -109,9 +176,11 @@ function get_resources_handler($request)
         'posts_per_page' => min($per_page, 50),
         'paged'          => $paged,
         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
+        'orderby'        => 'date',
+        'order'          => 'DESC',
     ];
 
-    $tax_query = [];
+    $tax_query = ['relation' => 'AND'];
 
     if (!empty($source)) {
         $tax_query[] = [
@@ -130,10 +199,6 @@ function get_resources_handler($request)
     }
 
     if (count($tax_query) > 1) {
-         $tax_query['relation'] = 'AND';
-    }
-
-    if (!empty($tax_query)) {
         $args['tax_query'] = $tax_query;
     }
 
@@ -146,14 +211,11 @@ function get_resources_handler($request)
 
     $formatted = inforepo_format_resources_response($query);
 
-    $items = $formatted['items'] ?? [];
-    $total = $formatted['total'] ?? 0;
-
     return rest_ensure_response([
-        'items'       => array_values($items),
-        'total'       => (int) $total,
+        'items'       => $formatted['items'],
+        'total'       => (int) $formatted['total'],
         'total_pages' => (int) $query->max_num_pages,
-        'item'        => $items[0] ?? null,
+        'item'        => $formatted['items'][0] ?? null,
     ]);
 }
 
