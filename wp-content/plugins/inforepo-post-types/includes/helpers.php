@@ -111,9 +111,7 @@ function get_resources_handler($request)
         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
     ];
 
-    $tax_query = [
-        'relation' => 'AND'
-    ];
+    $tax_query = [];
 
     if (!empty($source)) {
         $tax_query[] = [
@@ -132,6 +130,10 @@ function get_resources_handler($request)
     }
 
     if (count($tax_query) > 1) {
+         $tax_query['relation'] = 'AND';
+    }
+
+    if (!empty($tax_query)) {
         $args['tax_query'] = $tax_query;
     }
 
