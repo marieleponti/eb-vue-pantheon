@@ -238,11 +238,11 @@ function register_resource_taxonomies()
             'labels' => array(
                 'name' => 'Sources',
                 'singular_name' => 'Source',
-                'menu_name' => 'Sources',
+                'menu_name' => 'Source',
                 'all_items' => 'All Sources',
-                'edit_item' => 'Edit Sources',
-                'view_item' => 'View Sources',
-                'update_item' => 'Update Sources',
+                'edit_item' => 'Edit Source',
+                'view_item' => 'View Source',
+                'update_item' => 'Update Source',
                 'add_new_item' => 'Add New Source',
                 'new_item_name' => 'New Source',
                 'search_items' => 'Search Sources',
@@ -261,7 +261,7 @@ function register_resource_taxonomies()
             'meta_box_cb'           => false,
             'show_in_rest' => true,
             'query_var' => true,
-            'rewrite' => array('slug' => 'sources')
+            'rewrite' => array('slug' => 'source')
         )
     );
 
@@ -370,7 +370,7 @@ function register_resource_taxonomies()
             'meta_box_cb'  => false,
             'show_in_rest' => true,
             'query_var' => true,
-            'rewrite' => array('slug' => 'eb-research')
+            'rewrite' => array('slug' => 'research-team')
         )
     );
 
