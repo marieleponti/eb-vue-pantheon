@@ -101,10 +101,34 @@ function get_resources_handler($request)
     $paged = (int) ($request['page'] ?? 1);
     $per_page = (int) ($request['per_page'] ?? 16);
     $slug = sanitize_title($request['slug'] ?? '');
+    $source = sanitize_text_field($request['source'] ?? '');
+    $research_team = sanitize_text_field($request['research-team'] ?? '');
 
+    $tax_query = [];
+
+    if (!empty($source)) {
+        $tax_query[] = [
+            'taxonomy' => 'source',
+            'field'    => 'slug',
+            'terms'    => $source,
+        ];
+    }
+
+    if (!empty($research_team)) {
+        $tax_query[] = [
+            'taxonomy' => 'research-team',
+            'field'    => 'slug',
+            'terms'    => $research_team,
+        ];
+    }
+
+    if (!empty($tax_query)) {
+        $tax_query['relation'] = 'AND';
+        $args['tax_query'] = $tax_query;
+    }
     $args = [
         'post_type'      => 'inforepo_resource',
-        'posts_per_page' => $per_page,
+        'posts_per_page' => min($per_page, 50),
         'paged'          => $paged,
         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
     ];
@@ -132,17 +156,18 @@ function get_resources_handler($request)
 /**
  * Procesa la colección de recursos y mapea sus taxonomías y campos ACF de forma segura.
  */
-function inforepo_format_resources_response($query) {
+function inforepo_format_resources_response($query)
+{
     if (empty($query->posts)) {
         return ['items' => [], 'total' => 0];
     }
 
     $items = array_map(function ($post) {
         // Helper interno para taxonomías usando los slugs exactos de tu plugin CPT
-        $get_attached_terms = function($post_id, $taxonomy) {
+        $get_attached_terms = function ($post_id, $taxonomy) {
             $terms = get_the_terms($post_id, $taxonomy);
             if (is_wp_error($terms) || empty($terms)) return [];
-            return array_map(function($term) {
+            return array_map(function ($term) {
                 return [
                     'name' => $term->name,
                     'slug' => $term->slug
@@ -178,7 +203,7 @@ function inforepo_format_resources_response($query) {
             'permalink'     => get_permalink($post),
             'excerpt'       => get_the_excerpt($post), // Mantenido por si tu grid lo usa
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
-            
+
             // Campos Personalizados de ACF sincronizados con tus nombres reales
             'acf' => [
                 'description'      => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
@@ -193,7 +218,7 @@ function inforepo_format_resources_response($query) {
                 'authoring_organization' => $get_attached_terms($post->ID, 'authoring-organization'),
                 'country'                => $get_attached_terms($post->ID, 'country'),
                 'topic'                  => $get_attached_terms($post->ID, 'topic'),
-                'source'                 => $get_attached_terms($post->ID, 'source'), 
+                'source'                 => $get_attached_terms($post->ID, 'source'),
                 'format'                 => $get_attached_terms($post->ID, 'format'),
                 'city_community'         => $get_attached_terms($post->ID, 'city-community'), // Cambiado a 'city-community'
                 'language'               => $get_attached_terms($post->ID, 'language'),
