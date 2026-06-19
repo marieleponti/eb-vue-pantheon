@@ -100,10 +100,17 @@ function get_resources_handler($request)
 
     $paged = (int) ($request['page'] ?? 1);
     $per_page = (int) ($request['per_page'] ?? 16);
-    $slug = sanitize_title($request['slug'] ?? '');
+    $slug = sanitize_text_field($request['slug'] ?? '');
     $source = sanitize_text_field($request['source'] ?? '');
     $research_team = sanitize_text_field($request['research-team'] ?? '');
 
+    $args = [
+        'post_type'      => 'inforepo_resource',
+        'posts_per_page' => min($per_page, 50),
+        'paged'          => $paged,
+        'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
+    ];
+    
     $tax_query = [];
 
     if (!empty($source)) {
@@ -126,12 +133,6 @@ function get_resources_handler($request)
         $tax_query['relation'] = 'AND';
         $args['tax_query'] = $tax_query;
     }
-    $args = [
-        'post_type'      => 'inforepo_resource',
-        'posts_per_page' => min($per_page, 50),
-        'paged'          => $paged,
-        'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
-    ];
 
     if (!empty($slug)) {
         $args['name'] = $slug;
