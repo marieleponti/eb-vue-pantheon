@@ -255,10 +255,14 @@ function inforepo_format_resources_response($query)
         }
 
         // --- PROCESAR ARCHIVO DE ACF ('upload_files') ---
-        $acf_file = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
+        $acf_file_raw = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
+
         $file_url = '';
-        if (!empty($acf_file)) {
-            $file_url = is_array($acf_file) ? ($acf_file['url'] ?? '') : $acf_file;
+        if (is_array($acf_file_raw)) {
+            $first = $acf_file_raw[0] ?? null;
+            $file_url = is_array($first) ? ($first['url'] ?? '') : ($acf_file_raw['url'] ?? '');
+        } elseif (is_string($acf_file_raw)) {
+            $file_url = $acf_file_raw;
         }
 
         return [
@@ -271,13 +275,23 @@ function inforepo_format_resources_response($query)
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
             // Campos Personalizados de ACF sincronizados con tus nombres reales
+            // 'acf' => [
+            //     'description'      => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
+            //     'author'           => $author_name,
+            //     'file_url'         => $file_url,
+            //     'link_to_resource' => function_exists('get_field') ? get_field('link_to_resource', $post->ID) : get_post_meta($post->ID, 'link_to_resource', true),
+            //     'video_embed'      => function_exists('get_field') ? get_field('embed_video', $post->ID) : get_post_meta($post->ID, 'embed_video', true),
+            // ],
+
             'acf' => [
-                'description'      => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
-                'author'           => $author_name,
-                'file_url'         => $file_url,
+                'description' => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
+                'author' => $author_name,
+                'file_url' => $file_url,
+                'upload_files_raw' => $acf_file_raw, // <-- AGREGA ESTO
                 'link_to_resource' => function_exists('get_field') ? get_field('link_to_resource', $post->ID) : get_post_meta($post->ID, 'link_to_resource', true),
-                'video_embed'      => function_exists('get_field') ? get_field('embed_video', $post->ID) : get_post_meta($post->ID, 'embed_video', true),
+                'video_embed' => function_exists('get_field') ? get_field('embed_video', $post->ID) : get_post_meta($post->ID, 'embed_video', true),
             ],
+
 
             // Taxonomías vinculadas con los slugs reales declarados en tu plugin
             'taxonomies' => [
