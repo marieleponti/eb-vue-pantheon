@@ -271,39 +271,28 @@ function inforepo_format_resources_response($query)
 
         $file_url = '';
 
-        $extract_url_from_id = function ($id) {
-            $id = is_numeric($id) ? (int)$id : 0;
-            return $id ? (wp_get_attachment_url($id) ?: '') : '';
-        };
-
-        $try_url = function ($v) {
-            if (is_string($v) && filter_var($v, FILTER_VALIDATE_URL)) return $v;
-            return '';
-        };
-
         if (is_array($acf_file_raw)) {
-            // ACF suele devolver [0] si no es repetible
             $first = $acf_file_raw[0] ?? null;
 
-            // Caso: [['url' => '...'], ...]
-            if (is_array($first) && isset($first['url'])) {
+            // Caso: [{ upload_file: { url: ... } }]
+            if (is_array($first) && isset($first['upload_file']['url'])) {
+                $file_url = $first['upload_file']['url'];
+            }
+            // Caso: [{ url: ... }]
+            elseif (is_array($first) && isset($first['url'])) {
                 $file_url = $first['url'];
-            } else {
-                // Caso: [ID, ID...]
-                $file_url = $extract_url_from_id($first);
+            }
+            // Caso: [{ file: { url: ... } }]
+            elseif (is_array($first) && isset($first['file']['url'])) {
+                $file_url = $first['file']['url'];
+            }
+            // Caso: [ID, ...]
+            elseif (isset($first) && is_numeric($first)) {
+                $file_url = wp_get_attachment_url((int)$first) ?: '';
             }
         } elseif (is_string($acf_file_raw)) {
-            // Caso: URL string o ID string
-            $file_url = $try_url($acf_file_raw);
-            if (!$file_url && ctype_digit($acf_file_raw)) {
-                $file_url = $extract_url_from_id($acf_file_raw);
-            }
-        } elseif (is_numeric($acf_file_raw)) {
-            // Caso: ID numérico
-            $file_url = $extract_url_from_id($acf_file_raw);
+            if (filter_var($acf_file_raw, FILTER_VALIDATE_URL)) $file_url = $acf_file_raw;
         }
-
-
 
         return [
             'id'            => $post->ID,
