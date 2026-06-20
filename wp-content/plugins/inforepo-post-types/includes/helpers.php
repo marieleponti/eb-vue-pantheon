@@ -255,35 +255,54 @@ function inforepo_format_resources_response($query)
         }
 
         // --- PROCESAR ARCHIVO DE ACF ('upload_files') ---
+
+        // Commenting out to troubleshoot pdf render on Resource Single
+        // $acf_file_raw = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
+
+        // $file_url = '';
+        // if (is_array($acf_file_raw)) {
+        //     $first = $acf_file_raw[0] ?? null;
+        //     $file_url = is_array($first) ? ($first['url'] ?? '') : ($acf_file_raw['url'] ?? '');
+        // } elseif (is_string($acf_file_raw)) {
+        //     $file_url = $acf_file_raw;
+        // }
+
         $acf_file_raw = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
 
         $file_url = '';
 
-        if (empty($acf_file_raw)) {
-            $file_url = '';
-        } elseif (is_numeric($acf_file_raw)) {
-            $file_url = wp_get_attachment_url((int)$acf_file_raw) ?: '';
+        $extract_url_from_id = function ($id) {
+            $id = is_numeric($id) ? (int)$id : 0;
+            return $id ? (wp_get_attachment_url($id) ?: '') : '';
+        };
+
+        $try_url = function ($v) {
+            if (is_string($v) && filter_var($v, FILTER_VALIDATE_URL)) return $v;
+            return '';
+        };
+
+        if (is_array($acf_file_raw)) {
+            // ACF suele devolver [0] si no es repetible
+            $first = $acf_file_raw[0] ?? null;
+
+            // Caso: [['url' => '...'], ...]
+            if (is_array($first) && isset($first['url'])) {
+                $file_url = $first['url'];
+            } else {
+                // Caso: [ID, ID...]
+                $file_url = $extract_url_from_id($first);
+            }
         } elseif (is_string($acf_file_raw)) {
-            $file_url = ctype_digit($acf_file_raw)
-                ? (wp_get_attachment_url((int)$acf_file_raw) ?: '')
-                : $acf_file_raw;
-        } elseif (is_array($acf_file_raw)) {
-            // caso: [ ['url'=>...], ... ]
-            if (isset($acf_file_raw[0]) && is_array($acf_file_raw[0])) {
-                $first = $acf_file_raw[0];
-                if (!empty($first['url'])) {
-                    $file_url = $first['url'];
-                } elseif (!empty($first['ID'])) {
-                    $file_url = wp_get_attachment_url((int)$first['ID']) ?: '';
-                }
+            // Caso: URL string o ID string
+            $file_url = $try_url($acf_file_raw);
+            if (!$file_url && ctype_digit($acf_file_raw)) {
+                $file_url = $extract_url_from_id($acf_file_raw);
             }
-            // caso: ['url'=>...] o ['ID'=>...]
-            elseif (!empty($acf_file_raw['url'])) {
-                $file_url = $acf_file_raw['url'];
-            } elseif (!empty($acf_file_raw['ID'])) {
-                $file_url = wp_get_attachment_url((int)$acf_file_raw['ID']) ?: '';
-            }
+        } elseif (is_numeric($acf_file_raw)) {
+            // Caso: ID numérico
+            $file_url = $extract_url_from_id($acf_file_raw);
         }
+
 
 
         return [
@@ -295,16 +314,9 @@ function inforepo_format_resources_response($query)
             'excerpt'       => get_the_excerpt($post), // Mantenido por si tu grid lo usa
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
-            // Campos Personalizados de ACF sincronizados con tus nombres reales
-            // 'acf' => [
-            //     'description'      => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
-            //     'author'           => $author_name,
-            //     'file_url'         => $file_url,
-            //     'link_to_resource' => function_exists('get_field') ? get_field('link_to_resource', $post->ID) : get_post_meta($post->ID, 'link_to_resource', true),
-            //     'video_embed'      => function_exists('get_field') ? get_field('embed_video', $post->ID) : get_post_meta($post->ID, 'embed_video', true),
-            // ],
-
             'acf' => [
+                'upload_files_raw_debug' => $acf_file_raw,
+                'file_url_debug' => $file_url,
                 'description' => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
                 'author' => $author_name,
                 'file_url' => $file_url,
