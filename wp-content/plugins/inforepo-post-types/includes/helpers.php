@@ -258,12 +258,33 @@ function inforepo_format_resources_response($query)
         $acf_file_raw = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
 
         $file_url = '';
-        if (is_array($acf_file_raw)) {
-            $first = $acf_file_raw[0] ?? null;
-            $file_url = is_array($first) ? ($first['url'] ?? '') : ($acf_file_raw['url'] ?? '');
+
+        if (empty($acf_file_raw)) {
+            $file_url = '';
+        } elseif (is_numeric($acf_file_raw)) {
+            $file_url = wp_get_attachment_url((int)$acf_file_raw) ?: '';
         } elseif (is_string($acf_file_raw)) {
-            $file_url = $acf_file_raw;
+            $file_url = ctype_digit($acf_file_raw)
+                ? (wp_get_attachment_url((int)$acf_file_raw) ?: '')
+                : $acf_file_raw;
+        } elseif (is_array($acf_file_raw)) {
+            // caso: [ ['url'=>...], ... ]
+            if (isset($acf_file_raw[0]) && is_array($acf_file_raw[0])) {
+                $first = $acf_file_raw[0];
+                if (!empty($first['url'])) {
+                    $file_url = $first['url'];
+                } elseif (!empty($first['ID'])) {
+                    $file_url = wp_get_attachment_url((int)$first['ID']) ?: '';
+                }
+            }
+            // caso: ['url'=>...] o ['ID'=>...]
+            elseif (!empty($acf_file_raw['url'])) {
+                $file_url = $acf_file_raw['url'];
+            } elseif (!empty($acf_file_raw['ID'])) {
+                $file_url = wp_get_attachment_url((int)$acf_file_raw['ID']) ?: '';
+            }
         }
+
 
         return [
             'id'            => $post->ID,
