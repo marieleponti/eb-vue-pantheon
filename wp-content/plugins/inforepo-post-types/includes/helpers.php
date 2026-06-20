@@ -269,29 +269,38 @@ function inforepo_format_resources_response($query)
 
         $acf_file_raw = function_exists('get_field') ? get_field('upload_files', $post->ID) : null;
 
+        $upload_files = [];
         $file_url = '';
 
         if (is_array($acf_file_raw)) {
-            $first = $acf_file_raw[0] ?? null;
+            foreach ($acf_file_raw as $row) {
+                // Esperado según tu debug: [{ upload_file: { url, title } }, ...]
+                if (is_array($row) && isset($row['upload_file']) && is_array($row['upload_file'])) {
+                    $url = $row['upload_file']['url'] ?? '';
+                    $title = $row['upload_file']['title'] ?? '';
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                }
+                // Por si acaso otros formatos:
+                elseif (is_array($row) && isset($row['url'])) {
+                    $url = $row['url'];
+                    $title = $row['title'] ?? '';
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                } elseif (is_array($row) && isset($row['file']['url'])) {
+                    $url = $row['file']['url'];
+                    $title = $row['file']['title'] ?? '';
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                } elseif (is_numeric($row)) {
+                    $id = (int)$row;
+                    $url = wp_get_attachment_url($id) ?: '';
+                    $title = get_the_title($id);
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                }
+            }
 
-            // Caso: [{ upload_file: { url: ... } }]
-            if (is_array($first) && isset($first['upload_file']['url'])) {
-                $file_url = $first['upload_file']['url'];
+            // Primer PDF para tu viewer/botón simple
+            if (!empty($upload_files)) {
+                $file_url = $upload_files[0]['file']['url'] ?? '';
             }
-            // Caso: [{ url: ... }]
-            elseif (is_array($first) && isset($first['url'])) {
-                $file_url = $first['url'];
-            }
-            // Caso: [{ file: { url: ... } }]
-            elseif (is_array($first) && isset($first['file']['url'])) {
-                $file_url = $first['file']['url'];
-            }
-            // Caso: [ID, ...]
-            elseif (isset($first) && is_numeric($first)) {
-                $file_url = wp_get_attachment_url((int)$first) ?: '';
-            }
-        } elseif (is_string($acf_file_raw)) {
-            if (filter_var($acf_file_raw, FILTER_VALIDATE_URL)) $file_url = $acf_file_raw;
         }
 
         return [
@@ -304,16 +313,15 @@ function inforepo_format_resources_response($query)
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
             'acf' => [
-                'upload_files_raw_debug' => $acf_file_raw,
-                'file_url_debug' => $file_url,
                 'description' => function_exists('get_field') ? get_field('description', $post->ID) : get_post_meta($post->ID, 'description', true),
                 'author' => $author_name,
                 'file_url' => $file_url,
-                'upload_files_raw' => $acf_file_raw, // <-- AGREGA ESTO
+                'upload_files' => $upload_files,
+                'upload_files_raw' => $acf_file_raw,
+
                 'link_to_resource' => function_exists('get_field') ? get_field('link_to_resource', $post->ID) : get_post_meta($post->ID, 'link_to_resource', true),
                 'video_embed' => function_exists('get_field') ? get_field('embed_video', $post->ID) : get_post_meta($post->ID, 'embed_video', true),
             ],
-
 
             // Taxonomías vinculadas con los slugs reales declarados en tu plugin
             'taxonomies' => [
