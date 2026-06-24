@@ -87,77 +87,19 @@ function inforepo_get_filters()
 {
     return rest_ensure_response(get_filters_data());
 }
-
+<?php
 /**
- * REST API Handler for Resources Catalogue and Single view
+ * REEMPLAZO FINAL de get_resources_handler() en tu helpers.php.
+ * Incluye los dos fixes: tax_query (topic/format/country/language +
+ * soporte multi-selección) y búsqueda por texto (título + ACF description).
+ *
+ * Por qué la búsqueda mira título Y description por separado:
+ * el post_content/excerpt de este CPT casi siempre está vacío (el texto
+ * real vive en el campo ACF "description"), así que la búsqueda nativa de
+ * WP ('s' => $search, que solo mira título y post_content) por sí sola
+ * encuentra casi nada. Por eso se buscan IDs por título (nativo) y por
+ * meta "description" (LIKE) por separado, y se combinan con post__in.
  */
-// function get_resources_handler($request)
-// {
-//     $current_user = wp_get_current_user();
-
-//     $can_see_private =
-//         !empty($current_user->ID) && user_can($current_user, 'read_private_posts');
-
-//     $paged = (int) ($request['page'] ?? 1);
-//     $per_page = (int) ($request['per_page'] ?? 16);
-//     $slug = sanitize_text_field($request['slug'] ?? '');
-//     $source = sanitize_text_field($request['source'] ?? '');
-//     $research_team = sanitize_text_field($request['research-team'] ?? '');
-
-//     $args = [
-//         'post_type'      => 'inforepo_resource',
-//         'posts_per_page' => min($per_page, 50),
-//         'paged'          => $paged,
-//         'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
-//         'orderby'        => 'date',
-//         'order'          => 'DESC',
-//     ];
-
-//     $tax_query = [];
-
-//     if (!empty($source)) {
-//         $tax_query[] = [
-//             'taxonomy' => 'source',
-//             'field'    => 'slug',
-//             'terms'    => $source,
-//         ];
-//     }
-
-//     if (!empty($research_team)) {
-//         $tax_query[] = [
-//             'taxonomy' => 'research-team',
-//             'field'    => 'slug',
-//             'terms'    => $research_team,
-//         ];
-//     }
-
-//     if (!empty($tax_query)) {
-//     $tax_query = array_merge(
-//         ['relation' => 'AND'],
-//         $tax_query
-//     );
-//         $args['tax_query'] = $tax_query;
-//     }
-
-//     if (!empty($slug)) {
-//         $args['name'] = $slug;
-//         $args['posts_per_page'] = 1;
-//     }
-
-//     $query = new WP_Query($args);
-
-//     $formatted = inforepo_format_resources_response($query);
-
-//     $items = $formatted['items'] ?? [];
-//     $total = $formatted['total'] ?? 0;
-
-//     return rest_ensure_response([
-//         'items'       => array_values($items),
-//         'total'       => (int) $total,
-//         'total_pages' => (int) $query->max_num_pages,
-//         'item'        => $items[0] ?? null,
-//     ]);
-// }
 function get_resources_handler($request)
 {
     $current_user = wp_get_current_user();
@@ -165,41 +107,88 @@ function get_resources_handler($request)
     $can_see_private =
         !empty($current_user->ID) && user_can($current_user, 'read_private_posts');
 
+    $post_status = $can_see_private ? ['publish', 'private'] : ['publish'];
+
     $paged = (int) ($request['page'] ?? 1);
     $per_page = (int) ($request['per_page'] ?? 16);
     $slug = sanitize_text_field($request['slug'] ?? '');
     $source = sanitize_text_field($request['source'] ?? '');
     $research_team = sanitize_text_field($request['research-team'] ?? '');
+    $topic = sanitize_text_field($request['topic'] ?? '');
+    $format = sanitize_text_field($request['format'] ?? '');
+    $country = sanitize_text_field($request['country'] ?? '');
+    $language = sanitize_text_field($request['language'] ?? '');
+    $search = sanitize_text_field($request['search'] ?? '');
 
     $args = [
         'post_type'      => 'inforepo_resource',
         'posts_per_page' => min($per_page, 50),
         'paged'          => $paged,
-        'post_status'    => $can_see_private ? ['publish', 'private'] : ['publish'],
+        'post_status'    => $post_status,
         'orderby'        => 'date',
         'order'          => 'DESC',
     ];
 
+    // "slug1,slug2" -> ['slug1', 'slug2']
+    $split_terms = function (string $value): array {
+        return array_values(array_filter(array_map('trim', explode(',', $value))));
+    };
+
+    // ===== Taxonomías =====
     $tax_query = ['relation' => 'AND'];
 
-    if (!empty($source)) {
-        $tax_query[] = [
-            'taxonomy' => 'source',
-            'field'    => 'slug',
-            'terms'    => $source,
-        ];
-    }
+    $taxonomy_filters = [
+        'source'        => $source,
+        'research-team' => $research_team,
+        'topic'         => $topic,
+        'format'        => $format,
+        'country'       => $country,
+        'language'      => $language,
+    ];
 
-    if (!empty($research_team)) {
-        $tax_query[] = [
-            'taxonomy' => 'research-team',
-            'field'    => 'slug',
-            'terms'    => $research_team,
-        ];
+    foreach ($taxonomy_filters as $taxonomy => $value) {
+        if (!empty($value)) {
+            $tax_query[] = [
+                'taxonomy' => $taxonomy,
+                'field'    => 'slug',
+                'terms'    => $split_terms($value),
+            ];
+        }
     }
 
     if (count($tax_query) > 1) {
         $args['tax_query'] = $tax_query;
+    }
+
+    // ===== Búsqueda por texto (título + ACF "description") =====
+    if (!empty($search)) {
+        $title_matches = get_posts([
+            'post_type'      => 'inforepo_resource',
+            'post_status'    => $post_status,
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            's'              => $search,
+        ]);
+
+        $description_matches = get_posts([
+            'post_type'      => 'inforepo_resource',
+            'post_status'    => $post_status,
+            'posts_per_page' => -1,
+            'fields'         => 'ids',
+            'meta_query'     => [
+                [
+                    'key'     => 'description',
+                    'value'   => $search,
+                    'compare' => 'LIKE',
+                ],
+            ],
+        ]);
+
+        $matching_ids = array_values(array_unique(array_merge($title_matches, $description_matches)));
+
+        // Si no matchea nada, forzamos un ID imposible para que WP_Query
+        // devuelva 0 resultados (en vez de ignorar el filtro y devolver todo).
+        $args['post__in'] = !empty($matching_ids) ? $matching_ids : [0];
     }
 
     if (!empty($slug)) {
