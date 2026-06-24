@@ -87,7 +87,7 @@ function inforepo_get_filters()
 {
     return rest_ensure_response(get_filters_data());
 }
-<?php
+
 /**
  * REEMPLAZO FINAL de get_resources_handler() en tu helpers.php.
  * Incluye los dos fixes: tax_query (topic/format/country/language +
