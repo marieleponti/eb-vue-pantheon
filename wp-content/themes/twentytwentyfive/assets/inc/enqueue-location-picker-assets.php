@@ -3,11 +3,10 @@
  * Carga Leaflet + nuestro JS/CSS de admin SOLO en la pantalla de edición
  * de inforepo_resource (no en todo wp-admin).
  *
- * v2: usa get_current_screen() en vez de global $post — más confiable,
- * porque global $post no siempre está poblado en el momento exacto en
- * que ACF dispara este hook. Si querés confirmar que esto se está
- * ejecutando, mirá wp-content/debug.log después de recargar la edición
- * de un resource (deja un error_log() temporal abajo).
+ * v3: en vez de escribir a debug.log (que no siempre es accesible),
+ * muestra un aviso visible arriba de la pantalla de edición con lo que
+ * detectó. Borrá este archivo aviso temporal una vez que el mapa
+ * funcione — es solo para diagnosticar.
  */
 
 if (!defined('ABSPATH')) {
@@ -24,36 +23,41 @@ add_action('acf/input/admin_enqueue_scripts', function () {
 		$post_type = get_post_type((int) $_GET['post']);
 	}
 
-	error_log('[location-picker] acf/input/admin_enqueue_scripts disparado. post_type detectado: ' . var_export($post_type, true));
+	$base_path = get_stylesheet_directory() . '/assets/admin';
+	$js_exists = file_exists($base_path . '/location-picker.js');
+	$css_exists = file_exists($base_path . '/location-picker.css');
+
+	// Aviso visible en pantalla, no en logs.
+	add_action('admin_notices', function () use ($post_type, $js_exists, $css_exists, $base_path) {
+		echo '<div class="notice notice-info"><p><strong>[location-picker debug]</strong> ';
+		echo 'post_type detectado: <code>' . esc_html(var_export($post_type, true)) . '</code> | ';
+		echo 'location-picker.js existe: <code>' . ($js_exists ? 'SÍ' : 'NO') . '</code> | ';
+		echo 'location-picker.css existe: <code>' . ($css_exists ? 'SÍ' : 'NO') . '</code> | ';
+		echo 'ruta buscada: <code>' . esc_html($base_path) . '</code>';
+		echo '</p></div>';
+	});
 
 	if ($post_type !== 'inforepo_resource') {
 		return;
 	}
 
-	error_log('[location-picker] Encolando Leaflet + location-picker.js/css');
-
 	wp_enqueue_style('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css', [], '1.9.4');
 	wp_enqueue_script('leaflet', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', [], '1.9.4', true);
 
 	$base_uri = get_stylesheet_directory_uri() . '/assets/admin';
-	$base_path = get_stylesheet_directory() . '/assets/admin';
 
 	wp_enqueue_style(
 		'inforepo-location-picker',
 		$base_uri . '/location-picker.css',
 		[],
-		file_exists($base_path . '/location-picker.css') ? filemtime($base_path . '/location-picker.css') : null
+		$css_exists ? filemtime($base_path . '/location-picker.css') : null
 	);
 
 	wp_enqueue_script(
 		'inforepo-location-picker',
 		$base_uri . '/location-picker.js',
 		['acf-input', 'jquery', 'leaflet'],
-		file_exists($base_path . '/location-picker.js') ? filemtime($base_path . '/location-picker.js') : null,
+		$js_exists ? filemtime($base_path . '/location-picker.js') : null,
 		true
 	);
-
-	if (!file_exists($base_path . '/location-picker.js')) {
-		error_log('[location-picker] OJO: no se encontró location-picker.js en ' . $base_path);
-	}
 });
