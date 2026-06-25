@@ -22,7 +22,7 @@ function inforepo_setup() {
 }
 add_action('after_setup_theme', 'inforepo_setup');
 
-
+require_once get_stylesheet_directory() . '/inc/enqueue-location-picker-assets.php';
 /**
  * Add custom user roles
  * 

@@ -1,0 +1,39 @@
+.inforepo-location-map {
+	height: 320px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	z-index: 0;
+}
+
+.inforepo-location-suggestions {
+	list-style: none;
+	margin: 4px 0 0;
+	padding: 0;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	background: #fff;
+	max-height: 220px;
+	overflow-y: auto;
+	position: relative;
+	z-index: 10;
+}
+
+.inforepo-location-suggestions:empty {
+	display: none;
+	border: none;
+}
+
+.inforepo-location-suggestions li {
+	padding: 6px 10px;
+	cursor: pointer;
+	font-size: 13px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.inforepo-location-suggestions li:last-child {
+	border-bottom: none;
+}
+
+.inforepo-location-suggestions li:hover {
+	background: #f0f0f0;
+}
