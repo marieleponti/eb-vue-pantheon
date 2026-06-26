@@ -299,7 +299,8 @@ function inforepo_format_resources_response($query)
                 'label' => $acf_location['search'] ?? null,
             ];
         }
-        // === FIN NUEVO ===
+
+        $acf_description = function_exists('get_field') ? get_field('description', $post->ID) : '';
 
         return [
             'id'            => $post->ID,
@@ -307,7 +308,8 @@ function inforepo_format_resources_response($query)
             'title'         => get_the_title($post),
             'date'          => get_the_date('', $post),
             'permalink'     => get_permalink($post),
-            'excerpt'       => get_the_excerpt($post), // Mantenido por si tu grid lo usa
+            'excerpt' => wp_trim_words(wp_strip_all_tags($acf_description ?: $post->post_content), 30),
+            'content' => apply_filters('the_content', $post->post_content),
             'content'       => apply_filters('the_content', $post->post_content), 
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
