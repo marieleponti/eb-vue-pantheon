@@ -308,6 +308,7 @@ function inforepo_format_resources_response($query)
             'date'          => get_the_date('', $post),
             'permalink'     => get_permalink($post),
             'excerpt'       => get_the_excerpt($post), // Mantenido por si tu grid lo usa
+            'content'       => apply_filters('the_content', $post->post_content), 
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
             'acf' => [
