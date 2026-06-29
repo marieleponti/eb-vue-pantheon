@@ -255,34 +255,48 @@ function inforepo_format_resources_response($query)
 
         if (is_array($acf_file_raw)) {
             foreach ($acf_file_raw as $row) {
-                // Esperado según tu debug: [{ upload_file: { url, title } }, ...]
+                // Esperado según tu debug: [{ upload_file: { url, title, caption, description } }, ...]
                 if (is_array($row) && isset($row['upload_file']) && is_array($row['upload_file'])) {
                     $url = $row['upload_file']['url'] ?? '';
                     $title = $row['upload_file']['title'] ?? '';
-                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                    $caption = $row['upload_file']['caption'] ?? '';       // <- NUEVO: la fecha mostrada
+                    $description = $row['upload_file']['description'] ?? ''; // <- NUEVO
+
+                    if ($url) {
+                        $upload_files[] = [
+                            'file' => [
+                                'url'         => $url,
+                                'title'       => $title,
+                                'caption'     => $caption,
+                                'description' => $description,
+                            ]
+                        ];
+                    }
                 }
-                // Por si acaso otros formatos:
+                // Por si acaso otros formatos (sin caption/description disponibles ahí, quedan vacíos):
                 elseif (is_array($row) && isset($row['url'])) {
                     $url = $row['url'];
                     $title = $row['title'] ?? '';
-                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title, 'caption' => '', 'description' => '']];
                 } elseif (is_array($row) && isset($row['file']['url'])) {
                     $url = $row['file']['url'];
                     $title = $row['file']['title'] ?? '';
-                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title, 'caption' => '', 'description' => '']];
                 } elseif (is_numeric($row)) {
-                    $id = (int)$row;
+                    $id = (int) $row;
                     $url = wp_get_attachment_url($id) ?: '';
                     $title = get_the_title($id);
-                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title]];
+                    $caption = wp_get_attachment_caption($id) ?: '';
+                    if ($url) $upload_files[] = ['file' => ['url' => $url, 'title' => $title, 'caption' => $caption, 'description' => '']];
                 }
             }
 
-            // Primer PDF para tu viewer/botón simple
+            // Primer PDF para tu viewer/botón simple (sin cambios)
             if (!empty($upload_files)) {
                 $file_url = $upload_files[0]['file']['url'] ?? '';
             }
         }
+
 
         // === NUEVO: location (reemplaza Mapster) ===
         // get_field('location', $post->ID) devuelve el group ACF
@@ -310,7 +324,7 @@ function inforepo_format_resources_response($query)
             'permalink'     => get_permalink($post),
             'excerpt' => wp_trim_words(wp_strip_all_tags($acf_description ?: $post->post_content), 30),
             'content' => apply_filters('the_content', $post->post_content),
-            'content'       => apply_filters('the_content', $post->post_content), 
+            'content'       => apply_filters('the_content', $post->post_content),
             'featuredImage' => get_the_post_thumbnail_url($post->ID, 'large'),
 
             'acf' => [
