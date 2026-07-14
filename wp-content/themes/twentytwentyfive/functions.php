@@ -218,20 +218,6 @@ function get_filter_ids(array $filters_data = []): array
   return $filter_ids;
 }
 
-/**
- * 
- * This function is necessary for the ACF form that is used on the 
- * <Submit resource> page. 
- * 
- */
-add_action('get_header', 'inforepo_add_acf_form_head');
-function inforepo_add_acf_form_head()
-{
-  if (is_page('submit-resource')) {
-    acf_form_head();
-  }
-}
-
 
 /**
  * Main endpoint inforepo API get resources
