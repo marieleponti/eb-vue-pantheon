@@ -426,4 +426,14 @@ add_action('rest_api_init', function () {
 
 });
 
+
+/**
+ * Set the JWT token expiration to 2 hours.
+ * Adjust the duration as needed (e.g. 4 hours if the team
+ * prefers not to log in again too frequently).
+ */
+add_filter('jwt_auth_expire', function ($expire, $issuedAt) {
+    return $issuedAt + (4 * HOUR_IN_SECONDS);
+}, 10, 2);
+
   ?>
