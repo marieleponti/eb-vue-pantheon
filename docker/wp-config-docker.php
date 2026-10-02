@@ -38,6 +38,13 @@ define( 'WP_SITEURL', getenv( 'WORDPRESS_HOME_URL' ) );
 
 define( 'WP_AUTO_UPDATE_CORE', false );
 
+// Same as Pantheon's live environment: git is the source of truth for code.
+// A plugin installed through wp-admin would be wiped by the next deploy's
+// rsync, so the install/update UI is switched off. Set
+// WORDPRESS_ALLOW_FILE_MODS=true in .env.eb only for a deliberate, one-off
+// exception (e.g. running a migration plugin on the test site).
+define( 'DISALLOW_FILE_MODS', getenv( 'WORDPRESS_ALLOW_FILE_MODS' ) !== 'true' );
+
 // wp-config-pantheon.php sets this to true and relies on Pantheon's own
 // infra to run `wp cron event run` on a schedule instead. Off Pantheon we
 // keep WP's own cron, but drive it from a real system cron hitting

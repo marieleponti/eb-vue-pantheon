@@ -24,6 +24,14 @@ until php -r "
 done
 echo "Database is reachable."
 
+echo "Syncing code into /var/www/html..."
+# --delete drops files removed from the repo; uploads live on their own
+# volume and are excluded so they are never touched.
+rsync -a --delete --chown=www-data:www-data \
+    --exclude 'wp-content/uploads' \
+    /usr/src/eb-wp/ /var/www/html/
+
+mkdir -p /var/www/html/wp-content/uploads
 chown -R www-data:www-data /var/www/html/wp-content/uploads
 
 exec "$@"

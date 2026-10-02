@@ -1,0 +1,74 @@
+name: Deploy WordPress to DigitalOcean
+
+# Fires on every push to the listed branches. Testing phase: the feature
+# branch. At cutover, change this to [main] (and EB_WP_BRANCH in .env.eb on the
+# Droplet to match — the Droplet, not this file, decides what gets pulled).
+#
+# The SSH key is pinned on the Droplet to one forced command that accepts only
+# the words "wordpress" or "frontend" (see infra/ops/deploy-entry.sh). It
+# cannot open a shell, read files, or run anything else.
+#
+# Required secrets, in a GitHub Environment named "production"
+# (Settings > Environments), printed by infra/ops/setup-github-deploy.sh:
+#   DEPLOY_SSH_KEY, DEPLOY_HOST, DEPLOY_USER, DEPLOY_KNOWN_HOSTS
+#   SMOKE_URL   the WordPress domain, e.g. https://pruebas-admin.everywhereborder.org
+
+on:
+  push:
+    branches: [feature/droplet-docker]
+  workflow_dispatch:
+
+# An in-flight deploy is allowed to finish; cancelling mid-way is worse than
+# queueing.
+concurrency:
+  group: deploy-eb-wordpress
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pinned host key: without it StrictHostKeyChecking would have to be
+          # off and the runner would trust whatever answers on that address.
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Trigger the deployment
+        # pipefail matters: without it the pipe into tee returns tee's status,
+        # so a failed deploy on the Droplet would report as a green run.
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=30 \
+              "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
+              wordpress 2>&1 | tee deploy.log
+
+      - name: Smoke test
+        run: |
+          curl -fsS --retry 6 --retry-delay 5 --retry-all-errors \
+              -o /dev/null "${{ secrets.SMOKE_URL }}/wp-json/"
+
+      - name: Clean up the key
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519
+
+      - name: Report failure
+        if: failure()
+        run: |
+          echo "::error::Deployment failed. The previous version keeps running and"
+          echo "::error::ops/deploy.sh backed up the database before starting."
+          echo "::error::Roll back: ssh <user>@<droplet>, then"
+          echo "::error::  git -C /opt/eb-site/eb-vue-pantheon reset --hard <previous>"
+          echo "::error::  /opt/eb-site/infra/ops/deploy.sh wordpress"
