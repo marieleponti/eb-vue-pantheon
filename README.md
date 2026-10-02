@@ -1,39 +1,91 @@
-# WordPress
+# WordPress Backend — Technical README
 
-This is a WordPress repository configured to run on the [Pantheon platform](https://pantheon.io).
+**Last updated:** October 2026
+**Scope:** Technical reference for this repository. Security status, infrastructure details, and pending hardening items are tracked in a separate internal document (not kept in this repository).
 
-Pantheon is website platform optimized and configured to run high performance sites with an amazing developer workflow. There is built-in support for features such as Varnish, Redis, Apache Solr, New Relic, Nginx, PHP-FPM, MySQL, PhantomJS and more. 
+---
 
-## Getting Started
+## 1. What This Is
 
-### 1. Spin-up a site
+A **headless WordPress installation** — it serves content exclusively via the REST API to a separate frontend application (Vue.js). There is no theme rendering pages for public visitors; wp-admin is used only by internal staff to manage content.
 
-If you do not yet have a Pantheon account, you can create one for free. Once you've verified your email address, you will be able to add sites from your dashboard. Choose "WordPress" to use this distribution.
+```
+Frontend (separate repository/hosting)
+        │
+        │  HTTPS requests, JWT Bearer token
+        ▼
+WordPress REST API  ← this repository
+        │
+        ▼
+MySQL database
+```
 
-### 2. Load up the site
+---
 
-When the spin-up process is complete, you will be redirected to the site's dashboard. Click on the link under the site's name to access the Dev environment.
+## 2. Custom Code — Where It Lives
 
-![alt](http://i.imgur.com/2wjCj9j.png?1, '')
+| Location | Purpose |
+|---|---|
+| Theme `functions.php` | Custom role/capability definitions, REST API CORS filter |
+| `ebinforepo.php` (mu-plugin/theme include) | Active REST route registrations under the `ebinforepo/v1` namespace: `/resources`, `/me`, `/filters` |
+| `helpers.php` (or equivalent) | Query logic and response formatting for the `/resources` endpoint, including a custom taxonomy tree builder used for frontend filters |
 
-### 3. Run the WordPress installer
+All custom REST endpoints live under the `ebinforepo/v1` namespace. There is no other active custom namespace.
 
-How about the WordPress database config screen? No need to worry about database connection information as that is taken care of in the background. The only step that you need to complete is the site information and the installation process will be complete.
+---
 
-We will post more information about how this works but we recommend developers take a look at `wp-config.php` to get an understanding.
+## 3. Custom Roles & Capabilities
 
-![alt](http://i.imgur.com/4EOcqYN.png, '')
+| Role | Capabilities | Purpose |
+|---|---|---|
+| `eb_team` | `read_private_posts`, `edit_posts`, `edit_published_posts`, `publish_posts` | Internal staff — full content management |
+| `eb_community_member` | `read_private_posts` | Can view non-public content, cannot edit |
 
-If you would like to keep a separate set of configuration for local development, you can use a file called `wp-config-local.php`, which is already in our .gitignore file.
+Content visibility (`publish` vs `private` status) is enforced **server-side**, based on these capabilities — this is not just a frontend display filter. See `get_resources_handler()` in `helpers.php`.
 
-### 4. Enjoy!
+---
 
-![alt](http://i.imgur.com/fzIeQBP.png, '')
+## 4. Authentication
 
-## Branches
+- **Method:** JWT, via the **JWT Authentication for WP-API** plugin (Tmeister / `wp-api-jwt-auth`).
+- **Token expiration:** 4 hours, configured via the `jwt_auth_expire` filter in `functions.php`.
+- Authentication is for internal team use only — there is no public user registration or public-facing login flow tied to this backend.
+- `JWT_AUTH_SECRET_KEY` is set in `wp-config.php` (not committed — see your local `.env`/secrets manager). If it is ever rotated, all active sessions are invalidated immediately (expected behavior).
 
-The `default` branch of this repository is where PRs are merged, and has [CI](https://github.com/pantheon-systems/WordPress/tree/default/.circleci) that copies `default` to `master` after removing the CI directories. This allows customers to clone from `master` and implement their own CI without needing to worry about potential merge conflicts.
+---
 
-## Custom Upstreams
+## 5. REST API Endpoints
 
-If you are using this repository as a starting point for a custom upstream, be sure to review the [documentation](https://pantheon.io/docs/create-custom-upstream#pull-in-core-from-pantheons-upstream) and pull the core files from the `master` branch.
+| Route | Method | Auth | Purpose |
+|---|---|---|---|
+| `ebinforepo/v1/resources` | GET | Optional (affects visibility) | Returns resources; includes `private`-status items only for authorized roles |
+| `ebinforepo/v1/me` | GET | Required (Bearer token) | Returns current user's id/roles/capabilities |
+| `ebinforepo/v1/filters` | GET | None | Returns the taxonomy tree used by the frontend's filter UI |
+| `jwt-auth/v1/token` | POST | Credentials | Standard JWT plugin login endpoint |
+
+---
+
+## 6. CORS
+
+`functions.php` overrides WordPress's default REST CORS handling to allow only specific frontend origins (local development + the deployed frontend domain). Update the allowlist whenever the frontend's domain changes.
+
+---
+
+## 7. Content Model
+
+- No public content submission forms.
+- No public user registration.
+- No write access to content from the frontend — content is managed exclusively via wp-admin by internal staff.
+- No `Page` post type content in use — this is a headless setup built entirely on `post` and a custom `inforepo_resource` post type.
+
+---
+
+## 8. Local Development
+
+Standard WordPress local setup applies (e.g. Local, DDEV, or Pantheon's local tooling). Required environment values:
+
+- `JWT_AUTH_SECRET_KEY` — long, random string
+- `JWT_AUTH_CORS_ENABLE` — `true`
+- Database credentials per your local environment
+
+Ask the maintainer for a sanitized database export or seed data if you need realistic content to develop against.
