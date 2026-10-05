@@ -21,6 +21,11 @@ RUN curl -fsSL -o /usr/local/bin/wp \
         https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
     && chmod +x /usr/local/bin/wp
 
+# php-fpm wipes the environment of its workers unless told not to, and
+# wp-config-local.php reads every setting with getenv().
+RUN echo '[www]' > /usr/local/etc/php-fpm.d/zz-eb-env.conf \
+    && echo 'clear_env = no' >> /usr/local/etc/php-fpm.d/zz-eb-env.conf
+
 COPY php.ini-overrides.ini /usr/local/etc/php/conf.d/zz-eb-overrides.ini
 
 # The code is baked in at /usr/src/eb-wp, NOT /var/www/html. /var/www/html is

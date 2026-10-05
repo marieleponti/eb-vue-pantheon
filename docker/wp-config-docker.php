@@ -28,10 +28,11 @@ define( 'SECURE_AUTH_SALT', getenv( 'WORDPRESS_SECURE_AUTH_SALT' ) );
 define( 'LOGGED_IN_SALT', getenv( 'WORDPRESS_LOGGED_IN_SALT' ) );
 define( 'NONCE_SALT', getenv( 'WORDPRESS_NONCE_SALT' ) );
 
-// getenv('WORDPRESS_DEBUG') is the string "true"/"false", not a real bool.
-define( 'WP_DEBUG', getenv( 'WORDPRESS_DEBUG' ) === 'true' );
-define( 'WP_DEBUG_LOG', getenv( 'WORDPRESS_DEBUG' ) === 'true' );
-define( 'WP_DEBUG_DISPLAY', false );
+// WP_DEBUG, WP_DEBUG_LOG and WP_DEBUG_DISPLAY are NOT defined here on purpose:
+// wp-config.php defines them itself right after loading this file, and a
+// second define() makes PHP print "Constant already defined" warnings. With
+// display_errors on, those land inside HTTP responses and corrupt the JSON the
+// frontend reads from /wp-json/.
 
 define( 'WP_HOME', getenv( 'WORDPRESS_HOME_URL' ) );
 define( 'WP_SITEURL', getenv( 'WORDPRESS_HOME_URL' ) );
