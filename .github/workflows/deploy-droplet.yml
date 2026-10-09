@@ -74,6 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -o StrictHostKeyChecking=yes -o BatchMode=yes -o ConnectTimeout=30 \
+              -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
               "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" \
               wordpress 2>&1 | tee deploy.log
 
