@@ -35,14 +35,36 @@ jobs:
 
     steps:
       - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
+          umask 077
           mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          # Rebuild the private key from whatever the secret paste produced: CRLF line
+          # endings, newlines turned into spaces, or a single-line base64 of the file.
+          key="$(printf '%s' "$DEPLOY_SSH_KEY" | tr -d '\r')"
+          case "$key" in
+            *"BEGIN OPENSSH PRIVATE KEY"*) ;;
+            *) key="$(printf '%s' "$key" | tr -d ' \n\t' | base64 -d 2>/dev/null | tr -d '\r' || true)" ;;
+          esac
+          body="$(printf '%s' "$key" \
+            | sed -e 's/-----BEGIN OPENSSH PRIVATE KEY-----//' -e 's/-----END OPENSSH PRIVATE KEY-----//' \
+            | tr -d ' \n\t')"
+          {
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----"
+            printf '%s' "$body" | fold -w 70
+            echo
+            echo "-----END OPENSSH PRIVATE KEY-----"
+          } > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          if ! ssh-keygen -y -f ~/.ssh/id_ed25519 >/dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid OpenSSH private key. Paste the whole output of 'cat ~/.ssh/eb_site_deploy' (BEGIN to END lines included), or its single-line form from 'base64 -w0 ~/.ssh/eb_site_deploy'."
+            exit 1
+          fi
           # Pinned host key: without it StrictHostKeyChecking would have to be
           # off and the runner would trust whatever answers on that address.
-          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
 
       - name: Trigger the deployment
