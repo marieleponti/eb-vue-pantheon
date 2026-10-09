@@ -82,11 +82,11 @@ jobs:
         env:
           SMOKE_URL: ${{ secrets.SMOKE_URL }}
         run: |
-          url="$(printf '%s' "$SMOKE_URL" | tr -d ' \r\n\t')"
+          url="$(printf '%s' "$SMOKE_URL" | LC_ALL=C tr -cd 'A-Za-z0-9:/._-')"
           url="${url%/}"
           case "$url" in
             https://*) ;;
-            *) echo "::error::SMOKE_URL must start with https:// and hold only the site address, e.g. https://example.org (got ${#url} characters)."; exit 1 ;;
+            *) echo "::error::SMOKE_URL must start with https:// and hold only the site address, e.g. https://example.org (got ${#url} characters after cleaning)."; exit 1 ;;
           esac
           curl -fsS --retry 6 --retry-delay 5 --retry-all-errors \
               -o /dev/null "${url}/wp-json/"
