@@ -15,7 +15,7 @@ name: Deploy WordPress to DigitalOcean
 
 on:
   push:
-    branches: [feature/droplet-docker]
+    branches: [master]
   workflow_dispatch:
 
 # An in-flight deploy is allowed to finish; cancelling mid-way is worse than
