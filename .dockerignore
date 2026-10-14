@@ -1,0 +1,5 @@
+.git
+wp-content/uploads
+*.sql
+*.log
+wp-config-local.php
