@@ -6,7 +6,8 @@
 # wp-config.php already knows to load that file when PANTHEON_ENVIRONMENT
 # isn't set — nothing in wp-config.php had to change for this to work.
 
-FROM php:8.2-fpm
+# Pinned to a patched release (CVE-2026-109618/109619 fixed in 8.2.35); bump deliberately.
+FROM php:8.2.35-fpm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev libjpeg-dev libpng-dev libwebp-dev libfreetype6-dev \
